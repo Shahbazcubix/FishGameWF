@@ -36,7 +36,8 @@ public class BallBounce : MonoBehaviour {
 	private bool isPrey;
 	private bool isMate;
 	private int fishNumber;
-	
+	private bool m_bTag;
+
 	// Use this for initialization
 	void Awake () {
 		m_vHeading = new Vector3 (0.0f, 0.0f, 0.0f);//new Vector3 (Mathf.Sin (Random.Range (-1.0f, 1.0f) * Mathf.PI), -Mathf.Cos(Random.Range (-1.0f, 1.0f) * Mathf.PI), 0.0f);
@@ -55,7 +56,7 @@ public class BallBounce : MonoBehaviour {
 		isPrey = false;
 		isMate = false;
 		//fishNumber = -1;
-		
+		m_bTag = false;
 		//isKoi = false;
 		//isGoldfish = false;
 		//isDolphin = false;
@@ -66,7 +67,23 @@ public class BallBounce : MonoBehaviour {
 		//libidoCounter = Time.time + libido;
 		//hungerCounter = Time.time + hunger;
 	}
-	
+
+	public void unTag() {
+		m_bTag = false;
+	}
+
+	public void Tag() {
+		m_bTag = true;
+	}
+
+	public void setTag(bool val) {
+		m_bTag = val;
+	}
+
+	public bool getTag() {
+		return m_bTag;
+	}
+
 	public void setDolphin() {
 		this.isDolphin= true;
 	}
