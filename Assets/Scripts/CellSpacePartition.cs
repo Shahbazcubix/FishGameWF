@@ -8,7 +8,15 @@ using System.IO;
 public class CellSpacePartition : MonoBehaviour {
 	
 	public GameObject goldFish;
-	
+	public GameObject Dolfin;
+	private GameObject dolfinUsing;
+	public 	float wanderAngle = 5f;
+
+	public float m_dWanderDistance = 2.0f;
+	//public Vector3 m_vWanderTarget;
+	public float m_dWanderRadius = 1.2f;
+	public float m_dWanderJitter = 80.0f;
+
 	public Dictionary<string, double> domDictionary = new Dictionary<string, double>();
 	public double[] tempDouble = new double[2];
 
@@ -67,7 +75,8 @@ public class CellSpacePartition : MonoBehaviour {
 	public List<GameObject> m_Vehicles = new List<GameObject> ();
 	public List<GameObject> m_WanderList = new List<GameObject> ();
 	public List<GameObject> m_PlantList = new List<GameObject> ();
-	
+	public List<GameObject> m_RedFish = new List<GameObject> ();
+
 	private int MaxEntities = 300; //cannot handle 300 entities.  Maybe that's why not appear as in Netbeans steering behavior project...
 	private double m_dSpaceWidth =    50;
 	private double m_dSpaceHeight = 50;
@@ -151,7 +160,7 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	private BallBounce tempScript; 
 	private Vector3 m_vWanderTarget;
-	private float m_dWanderRadius;
+	//private float m_dWanderRadius;
 	private float WanderDist;
 	private float WanderWeight;
 	
@@ -221,7 +230,7 @@ public class CellSpacePartition : MonoBehaviour {
 		}
 		
 		
-		for (int i = 0; i < 50; i++) { //numAgents 50
+		for (int i = 0; i < 100; i++) { //numAgents 50
 			
 			GameObject clone;
 			Vector3 temp = new Vector3(Random.Range (10.0f, 900.0f), Random.Range (10.0f, 900.0f),Random.Range (10.0f, 900.0f));//for some reason all spheres move to one corner all time. 
@@ -238,7 +247,7 @@ public class CellSpacePartition : MonoBehaviour {
 			
 		}
 
-		for (int i = 0; i < 50; i++) { //50
+		for (int i = 0; i < 100; i++) { //50
 			
 			GameObject clone;
 			Vector3 temp = new Vector3(Random.Range (10.0f, 900.0f), Random.Range (10.0f, 900.0f),Random.Range (10.0f, 900.0f));//for some reason all spheres move to one corner all time. 
@@ -255,7 +264,7 @@ public class CellSpacePartition : MonoBehaviour {
 		}
 
 		
-		for (int i = 1; i < 30; i++) {//30
+		for (int i = 1; i < 75; i++) {//30
 			
 			GameObject clone;
 			Vector3 temp = new Vector3(Random.Range (30.0f, 900.0f), Random.Range (30.0f, 900.0f),Random.Range (30.0f, 900.0f));//for some reason all spheres move to one corner all time. 
@@ -272,6 +281,21 @@ public class CellSpacePartition : MonoBehaviour {
 			this.AddEntity(clone);
 			
 		}
+
+		GameObject clone1;
+		Vector3 temp1 = new Vector3(Random.Range (100.0f, 900.0f), Random.Range (100.0f, 900.0f),Random.Range (100.0f, 900.0f));//for some reason all spheres move to one corner all time. 
+		clone1 = Instantiate(Dolfin, temp1, Quaternion.identity) as GameObject; 
+		dolfinUsing = clone1;
+		clone1.GetComponent<BallBounce>().setDolphin ();
+		clone1.GetComponent<BallBounce> ().setState (4);
+		//clone.GetComponent<BallBounce>().setFishNumber(i);
+		////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
+		/// 
+		m_Vehicles.Add (clone1);
+		//m_WanderList.Add (clone1);
+		this.AddEntity(clone1);
+
+
 		
 		GameObject plantClone; 
 		
@@ -385,7 +409,9 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	void Start()
 	{
-		
+
+		m_vWanderTarget = new Vector3 (m_dWanderRadius * Mathf.Cos (Random.value * Mathf.PI * 2), m_dWanderRadius * Mathf.Sin (Random.value * Mathf.PI * 2), m_dWanderRadius * Mathf.Cos (Random.value * Mathf.PI * 2));
+
 		mateCount = 0;
 		//MateText.text = "# fish Mating: " + mateCount.ToString ();
 		//predatorCount = 0;
@@ -483,7 +509,13 @@ public class CellSpacePartition : MonoBehaviour {
 
 			double tempHunger = (double)tempScript.getHunger ();
 			double tempLibido = (double)tempScript.getLibido ();
-			
+
+			if (tempScript.getDolphin ()) {
+				tempScript.setTimer (0);
+				tempScript.setState (4);
+				//DolphinVel = tempScript.getVelocity();
+			}
+
 			float seconds = tempScript.getTimer ();
 			if (seconds > 50.0f && tempScript.getState () != 3 && tempScript.getState () != 5 && tempScript.getState () != 1 && tempScript.getState () != 2 &&
 			    tempScript.getState () != 6) {
@@ -906,6 +938,10 @@ public class CellSpacePartition : MonoBehaviour {
 						
 						//Debug.Log ("EEEAAAATTTTT!!!!!!");
 						tempScript.setState (1);//eat
+
+						//add predator to flee from***********
+						m_RedFish.Add (m_Vehicles[i]);
+
 						tempPrey.setState (2);//flee
 						tempScript.setPrey (GoldFishPreyGO);
 						tempPrey.setPredator (m_Vehicles [i]);
@@ -1239,6 +1275,10 @@ public class CellSpacePartition : MonoBehaviour {
 						
 						//Debug.Log ("EEEAAAATTTTT!!!!!!");
 						tempScript.setState (1);//eat
+
+						//Add predator to flee from
+						m_RedFish.Add (m_Vehicles[i]);
+
 						tempPrey.setState (2);//flee
 						tempScript.setPrey (closestEitherFish);
 						tempPrey.setPredator (m_Vehicles [i]);
@@ -1712,9 +1752,12 @@ public class CellSpacePartition : MonoBehaviour {
 		
 		//Force = Flee (tempPredator.transform.position, m_Vehicles [i]);
 		Force = Evade (tempPredator, m_Vehicles [i]);
-		
+
 		AccumulateForce (Force);
-		
+
+		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
+			AvoidPredator (i, m_Vehicles[i]);
+
 		Vector3 OldPos = m_Vehicles [i].transform.position;
 		
 		translatePosition (i);
@@ -1842,7 +1885,10 @@ public class CellSpacePartition : MonoBehaviour {
 		}
 		
 		AccumulateForce (Force);
-		
+
+		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
+			AvoidPredator (i, m_Vehicles[i]);
+
 		Vector3 OldPos = m_Vehicles [i].transform.position;
 		
 		translatePosition (i);
@@ -2160,7 +2206,12 @@ public class CellSpacePartition : MonoBehaviour {
 		//    AccumulateForce (Force);
 		Force = Vector3.zero;
 		//GameObject tempMate = tempScript.getMate ();
-		
+
+		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
+			AvoidPredator (i, m_Vehicles[i]);
+
+		Force = Vector3.zero;
+
 		//Force = Arrive (tempMate.transform.position, m_Vehicles[i]);
 		if (tempMate == null) {
 			tempScript.setState (0);
@@ -2178,7 +2229,9 @@ public class CellSpacePartition : MonoBehaviour {
         }*/
 		
 		AccumulateForce (Force);
-		
+
+
+
 		Vector3 OldPos = m_Vehicles [i].transform.position;
 		
 		translatePosition (i);
@@ -2253,15 +2306,23 @@ public class CellSpacePartition : MonoBehaviour {
 		
 		
 		//spheres only make significant movements when raycast hits wall.  
-		CalculateNeighbors (m_Vehicles [i].transform.position, 10.0f); //this radius is not used to calculate neighbors for testing?
+		//CalculateNeighbors (m_Vehicles [i].transform.position, 10.0f); //this radius is not used to calculate neighbors for testing?
 		
 		//    Force = Vector3.zero;
 		
 		//Force = Wander () * WanderWeight;
-		
+
+		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
+			AvoidPredator (i, m_Vehicles[i]);
+
+
+		//FlockingForce (i);
+		Force = Vector3.zero;
 		FlockingForce (i);
-		
-		
+
+		//AccumulateForce (Force);
+
+
 		Vector3 OldPos = m_Vehicles [i].transform.position;
 		
 		translatePosition (i);
@@ -2341,9 +2402,12 @@ public class CellSpacePartition : MonoBehaviour {
 		//    Force = Vector3.zero;
 		
 		//Force = Wander () * WanderWeight;
-		
+
+		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
+			AvoidPredator (i, m_Vehicles[i]);
+
 		FlockingForce (i);
-		
+
 		
 		Vector3 OldPos = m_Vehicles [i].transform.position;
 		
@@ -2558,7 +2622,7 @@ public class CellSpacePartition : MonoBehaviour {
 		
 		MainTarget = ent.transform.position;
 		MainTarget.x += 2.4f * Mathf.Cos (Random.value * Mathf.PI * 2.0f); //1.2
-		MainTarget.y += 0.5f * Time.deltaTime;
+		MainTarget.y += 2.4f * Mathf.Cos (Random.value * Mathf.PI * 2.0f); //.5
 		MainTarget.z += 2.4f * Mathf.Sin (Random.value * Mathf.PI * 2.0f);
 		
 		
@@ -2584,11 +2648,11 @@ public class CellSpacePartition : MonoBehaviour {
 	{
 		Vector3 ToPursuer = pursuer.transform.position - ent.transform.position;
 		
-		float ThreatRange = 800.0f;
+		float ThreatRange = 300.0f;
 		if (ToPursuer.sqrMagnitude > ThreatRange * ThreatRange) {
 			return new Vector3 (0.0f, 0.0f, 0.0f);
 		}
-		
+		DolphinVel = pursuer.gameObject.GetComponent<BallBounce> ().getVelocity ();
 		float LookAheadTime = ToPursuer.magnitude / (150.0f + DolphinVel.magnitude);
 		
 		return Flee ((pursuer.transform.position + (DolphinVel * LookAheadTime)), ent);
@@ -2811,7 +2875,10 @@ public class CellSpacePartition : MonoBehaviour {
 		
 		tempVelocity += acceleration * Time.deltaTime;  //what is value of Time.deltaTime vs netbeans time function???
 		////Debug.Log (tempHeadingOne); //this value of m_vVelocity is still 0,0,0 ...?
-		
+
+		if (tempScript.getDolphin ())
+			tempVelocity = tempVelocity;
+
 		if (tempVelocity.magnitude > MaxSpeed) {
 			Vector3 tempV = m_vVelocity.normalized;
 			tempVelocity = tempV * MaxSpeed;
@@ -2857,31 +2924,59 @@ public class CellSpacePartition : MonoBehaviour {
 		float x = m_Vehicles [i].transform.position.x;
 		float y = m_Vehicles [i].transform.position.y;
 		float z = m_Vehicles [i].transform.position.z;
+
+		if (m_Vehicles [i].gameObject.GetComponent<BallBounce> ().getDolphin ()) {
+			if (m_Vehicles [i].transform.position.x < 20f) {
+				x = 20f;
+			}  
+			
+			if (m_Vehicles [i].transform.position.x > 980f) {
+				x = 980f;
+			} 
+			
+			if (m_Vehicles [i].transform.position.y < 20f) {
+				y = 20f;
+			}
+			
+			if (m_Vehicles [i].transform.position.y > 980f) {
+				y = 980f;
+			}
+			
+			if (m_Vehicles [i].transform.position.z < 20f) {
+				z = 20f;
+			}
+			
+			if (m_Vehicles [i].transform.position.z > 980f) {
+				z = 980f;
+			}
+
+		} else {
+
+			if (m_Vehicles [i].transform.position.x < 0f) {
+				x = 1f;
+			}  
 		
-		if (m_Vehicles [i].transform.position.x < 0f) {
-			x = 1f;
-		}  
+			if (m_Vehicles [i].transform.position.x > 1000f) {
+				x = 999f;
+			} 
 		
-		if (m_Vehicles [i].transform.position.x > 1000f) {
-			x = 999f;
-		} 
+			if (m_Vehicles [i].transform.position.y < 0f) {
+				y = 1f;
+			}
 		
-		if (m_Vehicles [i].transform.position.y < 0f) {
-			y = 1f;
+			if (m_Vehicles [i].transform.position.y > 1000f) {
+				y = 999f;
+			}
+		
+			if (m_Vehicles [i].transform.position.z < 0f) {
+				z = 1f;
+			}
+		
+			if (m_Vehicles [i].transform.position.z > 1000f) {
+				z = 999f;
+			}
+		
 		}
-		
-		if (m_Vehicles [i].transform.position.y > 1000f) {
-			y = 999f;
-		}
-		
-		if (m_Vehicles [i].transform.position.z < 0f) {
-			z = 1f;
-		}
-		
-		if (m_Vehicles [i].transform.position.z > 1000f) {
-			z = 999f;
-		}
-		
 		Vector3 inBoundLocation = new Vector3(x,y,z);
 		m_Vehicles[i].transform.position = inBoundLocation;
 		
@@ -2891,8 +2986,11 @@ public class CellSpacePartition : MonoBehaviour {
 	}
 	
 	public void FlockingForce(int i) {
+
+		AvoidPredator (i, m_Vehicles [i]);
+
 		Force = Vector3.zero;
-		
+
 		Force = SeparationPlus (m_Vehicles [i]) * SeparationWeight;
 		//Force = Separation (m_Neighbors, m_Vehicles [i]) * SeparationWeight;
 		//Debug.Log (Force);
@@ -3053,4 +3151,156 @@ public class CellSpacePartition : MonoBehaviour {
 		}
 		return SteeringForce.normalized;
 	}
+
+	public void AvoidPredator(int i, GameObject ent) {
+		Force = Vector3.zero;
+		
+		GameObject closestRedFish = null;
+		float closestRFFloat = 300f;
+		float temp = 0f;
+		bool runAway = false;
+		
+		if (Vector3.Distance (m_Vehicles [i].transform.position, dolfinUsing.transform.position) < 300f)
+			Force = Evade (dolfinUsing, m_Vehicles [i]) * 1.5f;
+		
+		AccumulateForce (Force);
+		
+		Force = Vector3.zero;
+		
+		for (int j = 0; j < m_RedFish.Count; j++) {
+			if (m_RedFish[j].gameObject.GetComponent<BallBounce>().getState () != 1)
+			{
+				m_RedFish.RemoveAt (j);
+				m_RedFish.TrimExcess();
+				continue;
+			}
+			temp = Vector3.Distance(m_Vehicles[i].transform.position, m_RedFish[j].transform.position);
+			if (temp < closestRFFloat) {
+				closestRFFloat = temp;
+				closestRedFish = m_RedFish[j];
+				runAway = true;
+			}
+		}
+		
+		if (runAway) {
+			Force = Evade (closestRedFish, m_Vehicles[i]); //.01
+		}
+		
+		AccumulateForce (Force);
+
+	}
+
+	public Vector3 wander2(int i) {
+		float circleDistance = 100f;
+
+		Vector3 circleCenter = Vector3.zero;
+		circleCenter = m_Vehicles[i].GetComponent<BallBounce> ().getVelocity ();
+		circleCenter = circleCenter.normalized;
+		circleCenter = circleCenter * circleDistance;
+
+		Vector3 displacement = Vector3.zero;
+		displacement = new Vector3 (0f, -1f, 0f);
+		displacement = displacement * circleDistance;
+
+		float number = displacement.magnitude;
+		displacement.x = Mathf.Cos (wanderAngle) * number;
+		displacement.y = Mathf.Sin (wanderAngle) * number;
+		displacement.z = Mathf.Cos (wanderAngle) * number;
+
+		wanderAngle += Random.Range (0, 1) * 10f - 10f * 0.5f;
+
+		Vector3 WanderForce = Vector3.zero;
+
+		WanderForce = circleCenter + displacement;
+
+		return Seek (WanderForce, m_Vehicles[i]);
+	}
+
+	public Vector3 wander3(int i) {
+
+		float JitterThisTimeSlice = m_dWanderJitter * Time.fixedDeltaTime;
+
+		m_vWanderTarget += new Vector3 (Random.value * JitterThisTimeSlice, Random.value * JitterThisTimeSlice, Random.value * JitterThisTimeSlice);
+
+		m_vWanderTarget = m_vWanderTarget.normalized;
+
+		m_vWanderTarget *= m_dWanderRadius;
+
+		Vector3 target = m_vWanderTarget + new Vector3 (0f, 0f, m_dWanderDistance / Mathf.Cos (45));
+		Vector3 heading = m_Vehicles [i].gameObject.GetComponent<BallBounce> ().getHeading ();
+
+		Vector3 relative = transform.InverseTransformDirection (Vector3.right);
+
+		Vector3 normal = relative - Vector3.Project (relative, heading);
+
+		normal = normal.normalized * heading.magnitude;
+
+		float[,] matrix = new float[3,3];
+		float[,] identity = new float[3, 3];
+		float[,] temp = new float[3, 3];
+
+		for (int k = 0; k < 3; k++) {
+			for (int j = 0; j < 3; j++) {
+				matrix[k,j] = 0.0f;
+			}
+		}
+
+		matrix [0,0] = heading.x; matrix [0,1] = heading.y; matrix [0,2] = heading.z;
+		matrix [1,0] = normal.x; matrix [1,1] = normal.y; matrix [1,2] = normal.z;
+		matrix [2,0] = 0f; matrix [2,1] = 0; matrix [2,2] = 1;
+
+		identity [0,0] = 1f; identity [0,1] = 0f; identity [0,2] = 0f;
+		identity [1,0] = 0f; identity [1,1] = 1f; identity [1,1] = 0f;
+		identity [2,0] = 0f; identity [2,1] = 0f; identity [2,2] = 1f;
+
+		temp[0,0] = (identity[0,0] * matrix[0,0]) + (identity[0,1] * matrix[1,0]) + (identity[0,2]* matrix[2,0]);
+		temp[0,1] = (identity[0,0] * matrix[0,1]) + (identity[0,1] * matrix[1,1]) + (identity[0,2] * matrix[2,1]);
+		temp[0,2] = (identity[0,0] * matrix[0,2]) + (identity[0,1] * matrix[1,2]) + (identity[0,2] * matrix[2,2]);
+		
+		//second
+		temp[1,0] = (identity[1,0] * matrix[0,0]) + (identity[1,1] * matrix[1,0]) + (identity[1,2] * matrix[2,0]);
+		temp[1,1] = (identity[1,0] * matrix[0,1]) + (identity[1,1] * matrix[1,1]) + (identity[1,2] * matrix[2,1]);
+		temp[1,2] = (identity[1,0] * matrix[0,2]) + (identity[1,1] * matrix[1,2]) + (identity[1,2] * matrix[2,2]);
+		
+		//third
+		temp[2,0] = (identity[2,0] * matrix[0,0]) + (identity[2,1] * matrix[1,0]) + (identity[2,2] * matrix[2,0]);
+		temp[2,1] = (identity[2,0] * matrix[0,1]) + (identity[2,1] * matrix[1,1]) + (identity[2,2] * matrix[2,1]);
+		temp[2,2] = (identity[2,0] * matrix[0,2]) + (identity[2,1] * matrix[1,2]) + (identity[2,2] * matrix[2,2]);
+
+		identity = temp;
+
+		matrix [0, 0] = 1f; matrix [0, 1] = 0f; matrix [0, 2] = 0f;
+		matrix [1, 0] = 0f; matrix [1, 1] = 1f; matrix [1, 2] = 0f;
+		matrix [2, 0] = m_Vehicles [i].transform.position.x; matrix [2, 1] = m_Vehicles [i].transform.position.y; matrix [2, 2] = m_Vehicles [i].transform.position.z;
+
+
+		temp[0,0] = (identity[0,0] * matrix[0,0]) + (identity[0,1] * matrix[1,0]) + (identity[0,2]* matrix[2,0]);
+		temp[0,1] = (identity[0,0] * matrix[0,1]) + (identity[0,1] * matrix[1,1]) + (identity[0,2] * matrix[2,1]);
+		temp[0,2] = (identity[0,0] * matrix[0,2]) + (identity[0,1] * matrix[1,2]) + (identity[0,2] * matrix[2,2]);
+		
+		//second
+		temp[1,0] = (identity[1,0] * matrix[0,0]) + (identity[1,1] * matrix[1,0]) + (identity[1,2] * matrix[2,0]);
+		temp[1,1] = (identity[1,0] * matrix[0,1]) + (identity[1,1] * matrix[1,1]) + (identity[1,2] * matrix[2,1]);
+		temp[1,2] = (identity[1,0] * matrix[0,2]) + (identity[1,1] * matrix[1,2]) + (identity[1,2] * matrix[2,2]);
+		
+		//third
+		temp[2,0] = (identity[2,0] * matrix[0,0]) + (identity[2,1] * matrix[1,0]) + (identity[2,2] * matrix[2,0]);
+		temp[2,1] = (identity[2,0] * matrix[0,1]) + (identity[2,1] * matrix[1,1]) + (identity[2,2] * matrix[2,1]);
+		temp[2,2] = (identity[2,0] * matrix[0,2]) + (identity[2,1] * matrix[1,2]) + (identity[2,2] * matrix[2,2]);
+
+		identity = temp;
+
+		float tempX = (identity [0, 0] * target.x) + (identity [1, 0] * target.y) + (identity [2,0]);
+		float tempY = (identity [0, 1] * target.x) + (identity [1,1] * target.y) + (identity [2,1]);
+		float tempZ = /*(identity [0, 2] * target.x) + (identity [1, 2] * target.y)*/target.z + (identity [2, 2]);
+
+		target.x = tempX;
+		target.y = tempY;
+		target.z = tempZ;
+
+		return target - m_Vehicles[i].transform.position;
+
+	}
+
+
 }
