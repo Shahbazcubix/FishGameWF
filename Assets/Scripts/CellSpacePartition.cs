@@ -808,7 +808,7 @@ public class CellSpacePartition : MonoBehaviour {
 			if (state == 4 && tempScript.getKoi ()) {
 				////Debug.Log ("Entered Loop!!!"); Working!!!
 				for (int j = 0; j < m_WanderList.Count; j++) {
-					//    if (m_WanderList[j] != null) {
+					    if (m_WanderList[j] != null) {
 					BallBounce tempState = m_WanderList [j].GetComponent<BallBounce> ();
 					
 					if (tempState.getGoldfish ()) {
@@ -845,7 +845,7 @@ public class CellSpacePartition : MonoBehaviour {
 					} //here
 					
 					
-					//}
+					}
 				}
 				
 				
@@ -1148,7 +1148,7 @@ public class CellSpacePartition : MonoBehaviour {
 			if (state == 4 && tempScript.getAmberjack ()) {
 				////Debug.Log ("Entered Loop!!!"); Working!!!
 				for (int j = 0; j < m_WanderList.Count; j++) {
-					//    if (m_WanderList[j] != null) {
+					    if (m_WanderList[j] != null) {
 					BallBounce tempState = m_WanderList [j].GetComponent<BallBounce> ();
 					
 					if (tempState.getKoi ()) {
@@ -1186,7 +1186,7 @@ public class CellSpacePartition : MonoBehaviour {
 					
 					
 					
-					//}
+					}
 				}
 				
 				
@@ -2858,7 +2858,7 @@ public class CellSpacePartition : MonoBehaviour {
 		case 4:
 			Overshoot = m_Vehicles [i].transform.position + FeelerR - ClosestPoint;
 			Force = FeelerRNormal * Overshoot.magnitude * ObstacleAvoidanceWeight;
-			//Debug.Log (FeelerRNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);
+			//Debug.Log (FeelerRNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);rce);
 			AccumulateForce (Force);
 			break;
 			
@@ -2876,8 +2876,8 @@ public class CellSpacePartition : MonoBehaviour {
 		tempVelocity += acceleration * Time.deltaTime;  //what is value of Time.deltaTime vs netbeans time function???
 		////Debug.Log (tempHeadingOne); //this value of m_vVelocity is still 0,0,0 ...?
 
-		if (tempScript.getDolphin ())
-			tempVelocity = tempVelocity;
+		//if (tempScript.getDolphin ())
+		//	tempVelocity = tempVelocity;
 
 		if (tempVelocity.magnitude > MaxSpeed) {
 			Vector3 tempV = m_vVelocity.normalized;
