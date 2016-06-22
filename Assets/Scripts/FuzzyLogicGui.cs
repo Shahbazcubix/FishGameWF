@@ -184,7 +184,6 @@ public class FuzzyLogicGui : MonoBehaviour {
 
 		m_WanderList = GameObject.Find ("Container").gameObject.GetComponent<CellSpacePartition> ().getWanderList ();
 
-		hotLight = GameObject.Find ("Container").gameObject.GetComponent<CellSpacePartition> ().getHotSphere();
 	}
 	
 	

@@ -59,7 +59,7 @@ public class BallBounce : MonoBehaviour {
 		m_bTag = false;
 		//isKoi = false;
 		//isGoldfish = false;
-		//isDolphin = false;
+		isDolphin = false;
 		
 		//startTime = Time.time;
 		
@@ -261,14 +261,14 @@ public class BallBounce : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		/*
 		if (isMating && loop) {
 			StartCoroutine(matingTime());
 		}
 		
 		if (incrementCounters) {
 			StartCoroutine(counter1 ());
-		}
+		}*/
 	}
 	
 	IEnumerator matingTime() {

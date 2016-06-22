@@ -42,6 +42,7 @@ public class camerScript : MonoBehaviour {
 			transform.Rotate (Vector3.up, Space.Self);
 		}
 */
+/*
 		if (Input.GetKey (KeyCode.W)) {
 			transform.Rotate (Vector3.left, Space.Self);
 		}
@@ -49,5 +50,6 @@ public class camerScript : MonoBehaviour {
 		if (Input.GetKey (KeyCode.S)) {
 			transform.Rotate (Vector3.right, Space.Self);
 		}
+        */
 	}
 }

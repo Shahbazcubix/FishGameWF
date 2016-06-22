@@ -7,136 +7,73 @@ using System.IO;
 
 public class CellSpacePartition : MonoBehaviour {
 	
-	public GameObject goldFish;
-	public GameObject Dolfin;
-	private GameObject dolfinUsing;
-	public 	float wanderAngle = 5f;
-
-	public float m_dWanderDistance = 2.0f;
-	//public Vector3 m_vWanderTarget;
-	public float m_dWanderRadius = 1.2f;
-	public float m_dWanderJitter = 80.0f;
+	public GameObject goldFish, Dolfin, dolfinUsing, SeaHorse;
+	public 	float wanderAngle = 5f, m_dWanderDistance = 2.0f, m_dWanderRadius = 1.2f, m_dWanderJitter = 80.0f;
 
 	public Dictionary<string, double> domDictionary = new Dictionary<string, double>();
 	public double[] tempDouble = new double[2];
 
-	public FuzzyLogicGui flg;
-	public double m_dViewDistance;
+    private CellSpacePartition m_pCellSpace;
+    private BoundingCircle QueryCircle;
+    public Eat cp;
+    private BallBounce tempScript;
+
+    public double m_dViewDistance;
 
 	public bool fuzzifyInUse;
+    private bool WallCollision;
+    public bool anotherFish;
 
-	private string fileName = "";
+    private string fileName = "";
 
 	private Animation anim;
 
-	public GameObject hotLight;
-	public GameObject coldLight;
-	public GameObject hotLightPosition;
+	public Text MateText, PredatorText, PreyText, BabyText;
 
-	public Text MateText;
-	public int mateCount;
-	public Text PredatorText;
-	public int predatorCount;
-	public Text PreyText;
-	public int preyCount;
-	public Text BabyText;
-	public int babyCount;
-	//public GameObject plant;
-	public GameObject stone;
-	public GameObject stone1by2;
-	public GameObject stone2by3;
-	public GameObject stone2by4;
-	public GameObject stone5by5;
-	public GameObject stone5by6;
+	public int mateCount, predatorCount, preyCount, babyCount;
+
+    //public GameObject plant;
+	public GameObject stone, stone1by2, stone2by3, stone2by4, stone5by5, stone5by6;
 	
-	public GameObject seaweed;
-	public GameObject seaweed5by5;
-	public GameObject seaweed5by8;
-	public GameObject coral1;
-	public GameObject coral2;
-	public GameObject coral4;
-	public GameObject seaShell1;
-	public GameObject seaShell6;
-	public GameObject seaShell11;
-	public GameObject sponge1;
-	public GameObject sponge2by2;
-	public GameObject sponge3by3;
+	public GameObject seaweed, seaweed5by5, seaweed5by8, coral1, coral2, coral4, seaShell1, seaShell6, seaShell11,
+        sponge1, sponge2by2, sponge3by3;
 	
 	
-	public GameObject fish;
-	public GameObject fishDolphin;
-	public Material fishMaterial;
-	public Material mateMaterial;
-	
-	public int counter;
+	public GameObject fish, fishDolphin;
+	public Material fishMaterial, mateMaterial;
 	
 	public List<Cell> m_Cells = new List<Cell>();
 	private List<GameObject> m_Neighbors;
-	public List<GameObject> m_Vehicles = new List<GameObject> ();
-	public List<GameObject> m_WanderList = new List<GameObject> ();
-	public List<GameObject> m_PlantList = new List<GameObject> ();
-	public List<GameObject> m_RedFish = new List<GameObject> ();
+    public List<GameObject> m_Vehicles = new List<GameObject>(), m_WanderList = new List<GameObject>(), m_PlantList = new List<GameObject>(),
+     m_RedFish = new List<GameObject>();
 
-	private int MaxEntities = 300; //cannot handle 300 entities.  Maybe that's why not appear as in Netbeans steering behavior project...
-	private double m_dSpaceWidth =    50;
-	private double m_dSpaceHeight = 50;
-	private double m_dSpaceDepth = 50;
-	
-	private CellSpacePartition m_pCellSpace;
-	
-	private int NumCellsX = 10; //7
-	private int NumCellsY = 10;
-	private int NumCellsZ = 10;
-	private int NumAgents = 50;//why do all spheres go to x-z positive corner?
-	private double cx = 1000;
-	private double cy = 1000, cz = 1000;
-	
-	private int m_iNumCellsX;
-	private int m_iNumCellsY;
-	private int m_iNumCellsZ;
-	private double m_dCellSizeX;
-	private double m_dCellSizeY;
-	private double m_dCellSizeZ;
-	
-	private BoundingCircle QueryCircle;
-	private Vector3 TempTargetPos;
-	private int TempQueryRadius;
+	private double m_dSpaceWidth = 50, m_dSpaceHeight = 50, m_dSpaceDepth = 50;
+
+    private int NumCellsX = 10, NumCellsY = 10, NumCellsZ = 10, NumAgents = 50, counter, TempQueryRadius;//why do all spheres go to x-z positive corner?
+	private double cx = 1000, cy = 1000, cz = 1000, m_dCellSizeX, m_dCellSizeY, m_dCellSizeZ;
+
+    private int m_iNumCellsX, m_iNumCellsY, m_iNumCellsZ, MaxEntities = 300, state;
 	
 	private Vector3 FeelerU, FeelerD, FeelerR, FeelerL, FeelerF;
 	private Vector3 FeelerUNormal, FeelerDNormal, FeelerRNormal, FeelerLNormal, FeelerFNormal;
 	private float DistToClosestIP, DistToThisIP;
-	private Vector3 ClosestPoint;
-	private Vector3 Overshoot;
-	private bool WallCollision;
+	private Vector3 ClosestPoint, TempTargetPos, Overshoot;
+
 	private enum feeler { forward, up, down, left, right};
 	private int caseSwitch;
 	private float rayLength;
 	
-	
 	public GameObject container;//do I need this?
-	
 	
 	
 	private float MaxSpeed;// = 150.0f;  What are good values for this and MaxSteeringForce?
 	private float MaxSteeringForce;
 	private Vector3 SteeringForceSum;
-	private float VehicleMass;
-	private float VehicleScale;
-	private Vector3 m_vVelocity;
-	private Vector3 Force;
-	private float SeparationWeight;
-	private float CohesionWeight;
-	private float AlignmentWeight;
-	private float ObstacleAvoidanceWeight;
+	private float VehicleMass, VehicleScale;
+	private Vector3 m_vVelocity, Force;
+	private float SeparationWeight, CohesionWeight, AlignmentWeight, ObstacleAvoidanceWeight;
 	
-	
-	
-	private Vector3 tempVector;
-	private Vector3 tempHeadingOne;
-	private Vector3 tempHeadingTwo;
-	private Vector3 hitNormal;
-	private Vector3 tempHeading;
-	private Vector3 tempVelocity;
+	private Vector3 tempVector, tempHeadingOne, tempHeadingTwo, hitNormal, tempHeading, tempVelocity;
 	
 	public Vector3 DolphinVel;
 	
@@ -158,258 +95,37 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	Deceleration dec;
 	
-	private BallBounce tempScript; 
+	
 	private Vector3 m_vWanderTarget;
 	//private float m_dWanderRadius;
-	private float WanderDist;
-	private float WanderWeight;
+	private float WanderDist, WanderWeight;
 	
-	public GameObject closestGO;
+	public GameObject closestGO, GoldFishPreyGO, KoiMateGO;
 	public float closestFish;
-	public Eat cp;
-	public bool anotherFish;
-	private int z;
 	
-	GameObject GoldFishPreyGO;
-	GameObject KoiMateGO;
 	public int AmberjackCount;
-
-	private int numberGF;
-	private int numberKoi;
-	private int numberAJ;
+	private int numberGF, numberKoi,  numberAJ, z;
 
 	// Use this for initialization
 	void Awake () {
-		//setup the spatial subdivision class
-		//    CellSpacePartition((double) cx, (double) cy,(double) cz,
-		//               NumCellsX, NumCellsY, NumCellsZ, NumAgents);
-		
-		AmberjackCount = 0;
-
-		m_dViewDistance = 50.0d;
-
-		numberGF = 0;
-		numberKoi = 0;
-		numberAJ = 0;
-
-		m_dSpaceWidth = cx;//1000
-		m_dSpaceHeight = cy;
-		m_dSpaceDepth = cz;
-		
-		m_iNumCellsX = NumCellsX;//10
-		m_iNumCellsY = NumCellsY;
-		m_iNumCellsZ = NumCellsZ;
-		
-		m_dCellSizeX = cx / NumCellsX; //10
-		m_dCellSizeY = cy / NumCellsY;
-		m_dCellSizeZ = cz / NumCellsZ;
-		
-		m_Neighbors = new List<GameObject> (MaxEntities); //100
-		
-		//create the cells.  Is this correct?  Yes. 
-		for (int z = 0; z < m_iNumCellsZ; ++z) {
-			for (int y = 0; y < m_iNumCellsY; ++y) {
-				for (int x = 0; x < m_iNumCellsX; ++x) {
-					double left = x * m_dCellSizeX;
-					double right = left + m_dCellSizeX;
-					double bot = y * m_dCellSizeY;
-					double top = bot + m_dCellSizeY;
-					double front = z * m_dCellSizeZ;
-					double back = front + m_dCellSizeZ;
-					
-					Vector3 tempFront = new Vector3((float)left, (float)bot,(float)front);
-					Vector3 tempBack = new Vector3((float)right, (float)top, (float)back);
-					Vector3 sum = (tempFront + tempBack);
-					Vector3 midPoint = sum/2;
-					
-					m_Cells.Add (new Cell (midPoint, 50.0f));//value is 50, but screen in netbeans if 500x500.  so, use 10.0f?
-				}
-			}
-			
-			
-		}
-		
-		
-		for (int i = 0; i < 100; i++) { //numAgents 50
-			
-			GameObject clone;
-			Vector3 temp = new Vector3(Random.Range (10.0f, 900.0f), Random.Range (10.0f, 900.0f),Random.Range (10.0f, 900.0f));//for some reason all spheres move to one corner all time. 
-			clone = Instantiate(fish, temp, Quaternion.identity) as GameObject;    
-			clone.GetComponent<BallBounce>().setKoi ();
-			//clone.GetComponent<BallBounce>().setFishNumber(i);
-			////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
-
-			numberKoi++;
-
-			m_Vehicles.Add (clone);
-			m_WanderList.Add (clone);
-			this.AddEntity(clone);
-			
-		}
-
-		for (int i = 0; i < 100; i++) { //50
-			
-			GameObject clone;
-			Vector3 temp = new Vector3(Random.Range (10.0f, 900.0f), Random.Range (10.0f, 900.0f),Random.Range (10.0f, 900.0f));//for some reason all spheres move to one corner all time. 
-			clone = Instantiate(goldFish, temp, Quaternion.identity) as GameObject;    
-			clone.GetComponent<BallBounce>().setGoldfish ();
-			////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
-
-			numberGF++;
-
-			m_Vehicles.Add (clone);
-			m_WanderList.Add (clone);
-			this.AddEntity(clone);
-			
-		}
-
-		
-		for (int i = 1; i < 75; i++) {//30
-			
-			GameObject clone;
-			Vector3 temp = new Vector3(Random.Range (30.0f, 900.0f), Random.Range (30.0f, 900.0f),Random.Range (30.0f, 900.0f));//for some reason all spheres move to one corner all time. 
-			clone = Instantiate(fishDolphin, temp, Quaternion.identity) as GameObject;    
-			clone.GetComponent<BallBounce>().setAmberjack ();
-			//clone.GetComponent<BallBounce>().setFishNumber(i);
-			////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
-
-			numberAJ++;
-
-			AmberjackCount++;
-			m_Vehicles.Add (clone);
-			m_WanderList.Add (clone);
-			this.AddEntity(clone);
-			
-		}
-
-		GameObject clone1;
-		Vector3 temp1 = new Vector3(Random.Range (100.0f, 900.0f), Random.Range (100.0f, 900.0f),Random.Range (100.0f, 900.0f));//for some reason all spheres move to one corner all time. 
-		clone1 = Instantiate(Dolfin, temp1, Quaternion.identity) as GameObject; 
-		dolfinUsing = clone1;
-		clone1.GetComponent<BallBounce>().setDolphin ();
-		clone1.GetComponent<BallBounce> ().setState (4);
-		//clone.GetComponent<BallBounce>().setFishNumber(i);
-		////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
-		/// 
-		m_Vehicles.Add (clone1);
-		//m_WanderList.Add (clone1);
-		this.AddEntity(clone1);
+        //setup the spatial subdivision class
+        //    CellSpacePartition((double) cx, (double) cy,(double) cz,
+        //               NumCellsX, NumCellsY, NumCellsZ, NumAgents);
 
 
-		
-		GameObject plantClone; 
-		
-		for (int j = 0; j < 10; j++) {
-			Vector3 plantLoc = new Vector3 (Random.Range (10.0f, 980.0f), 20.0f, Random.Range (10.0f, 980.0f));
-			plantClone = Instantiate (seaweed, plantLoc, Quaternion.identity) as GameObject;
-			
-			m_PlantList.Add (plantClone);
-		}
-		
-		for (int j = 0; j < 10; j++) {
-			Vector3 plantLoc = new Vector3 (Random.Range (10.0f, 980.0f), 20.0f, Random.Range (10.0f, 980.0f));
-			plantClone = Instantiate (seaweed5by5, plantLoc, Quaternion.identity) as GameObject;
-			//m_PlantList.Add (plantClone);
-		}
-		
-		
-		for (int j = 0; j < 10; j++) {
-			Vector3 plantLoc = new Vector3 (Random.Range (10.0f, 980.0f), 20.0f, Random.Range (10.0f, 980.0f));
-			plantClone = Instantiate (seaweed5by8, plantLoc, Quaternion.identity) as GameObject;
-			//m_PlantList.Add (plantClone);
-		}
-		
-		
-		//    Instantiate (plant, plantLoc, Quaternion.identity);
-		for (int i = 0; i < 10; i++) {
-			Vector3 stoneLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (stone, stoneLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (coral1, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (coral2, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (coral4, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (seaShell1, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (seaShell6, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (seaShell11, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (sponge1, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (sponge2by2, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (sponge3by3, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (stone1by2, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (stone2by3, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (20.0f, 900.0f), 10.0f, Random.Range (20.0f,900.0f));
-			Instantiate (stone2by4, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (stone5by5, coralLoc, Quaternion.identity);
-		}
-		
-		for (int i = 0; i < 10; i++) {
-			Vector3 coralLoc = new Vector3 (Random.Range (10.0f, 900.0f), 10.0f, Random.Range (0.0f,1000.0f));
-			Instantiate (stone5by6, coralLoc, Quaternion.identity);
-		}
+        CreateCells();
 
-		hotLightPosition = Instantiate (hotLight, new Vector3 (500.0f, 900.0f, 500.0f), Quaternion.identity) as GameObject;
-		//Instantiate (coldLight, new Vector3 (100.0f, 900.0f, 100.0f), Quaternion.identity);
+        InitializeFish();
 
-		flg = GameObject.Find ("Main Camera").gameObject.GetComponent<FuzzyLogicGui> ();
+        InitializePlants();
+        
 		fuzzifyInUse = false;
-
-
 
 	}
 	
 	
 	void Start()
 	{
-
 		m_vWanderTarget = new Vector3 (m_dWanderRadius * Mathf.Cos (Random.value * Mathf.PI * 2), m_dWanderRadius * Mathf.Sin (Random.value * Mathf.PI * 2), m_dWanderRadius * Mathf.Cos (Random.value * Mathf.PI * 2));
 
 		mateCount = 0;
@@ -429,7 +145,7 @@ public class CellSpacePartition : MonoBehaviour {
 		m_Neighbors = new List<GameObject> ();
 		SeparationWeight = 1.0f;//multiplying values sep/coh/align by 10 seems to work well!
 		CohesionWeight = 2.0f;
-		ObstacleAvoidanceWeight = 0.7f;//what is a good weight for testing this? .o5
+        ObstacleAvoidanceWeight = .7f;// 0.7f;//what is a good weight for testing this? .o5
 		AlignmentWeight = 1.0f;
 		
 		DistToThisIP = 0.0f;
@@ -469,31 +185,7 @@ public class CellSpacePartition : MonoBehaviour {
 		//cp.m_FuzzyModule.WriteAllDOMs ();
 		GoldFishPreyGO = null;
 		KoiMateGO = null;
-
-		/*
-		fileName = System.Environment.GetFolderPath (System.Environment.SpecialFolder.DesktopDirectory);
-		fileName += "/Myfile.txt";
-
-
-		BallBounce temp = m_Vehicles [0].gameObject.GetComponent<BallBounce> ();
-		temp.setTimer (0.0f);
-		m_Vehicles [0].transform.position = new Vector3 (500.0f, 800.0f, 500.0f);
-		temp.setHunger (0.0f);
-		temp.setLibido (0.0f);
-
-		BallBounce temp1 = m_Vehicles [1].gameObject.GetComponent<BallBounce> ();
-		temp1.setTimer (30.0f);
-		m_Vehicles [1].transform.position = new Vector3 (500.0f, 500.0f, 500.0f);
-		temp1.setHunger (10.0f);
-		temp1.setLibido (10.0f);
-
-	
-		BallBounce temp2 = m_Vehicles [2].gameObject.GetComponent<BallBounce> ();
-		temp2.setTimer (0.0f);
-		m_Vehicles [2].transform.position = new Vector3 (560.0f, 100.0f, 500.0f);
-		temp2.setHunger (0.0f);
-		temp2.setLibido (0.0f);
-			*/
+        
 	}
 	
 	void Update()
@@ -504,982 +196,16 @@ public class CellSpacePartition : MonoBehaviour {
 			closestFish = 1000.0f;
 			
 			tempScript = m_Vehicles [i].GetComponent<BallBounce> ();
-
-			setAnimationSpeed(i);
-
-			double tempHunger = (double)tempScript.getHunger ();
-			double tempLibido = (double)tempScript.getLibido ();
-
-			if (tempScript.getDolphin ()) {
-				tempScript.setTimer (0);
-				tempScript.setState (4);
-				//DolphinVel = tempScript.getVelocity();
-			}
-
-			float seconds = tempScript.getTimer ();
-			if (seconds > 50.0f && tempScript.getState () != 3 && tempScript.getState () != 5 && tempScript.getState () != 1 && tempScript.getState () != 2 &&
-			    tempScript.getState () != 6) {
-				////Debug.Log ("changed state to Wander");
-				tempScript.setState (4);
-				tempScript.setTimer (0.0f);
-			}
-			
-			int state = tempScript.getState ();
-			GameObject closestGfMateGO = null;
-			float closestGoldFishFloat = 1000.0f;
-			
-			
-			
-			if (state == 4 && tempScript.getGoldfish()) {
-				////Debug.Log ("Entered Loop!!!"); Working!!!
-				
-				//this is to find mate...
-				for (int j = 0; j < m_WanderList.Count; j++) {
-					if (m_WanderList[j] != null) {
-						BallBounce tempState = m_WanderList [j].GetComponent<BallBounce> ();
-						if (tempState.getGoldfish()) { //check for all goldfish, in any state..
-							bool areEqual = System.Object.ReferenceEquals (m_Vehicles [i], m_WanderList [j]);
-							if (!areEqual) {
-								float temp = Vector3.Distance (m_Vehicles [i].transform.position, m_WanderList [j].transform.position);
-								if (temp < closestGoldFishFloat) {
-									closestGoldFishFloat = temp;
-									closestGfMateGO = m_WanderList [j];
-									//anothFish = true;
-									tempScript.setAnotherFish (true);//when do you reset this to false????  This is reset to false...
-									//closestGO.gameObject.GetComponent<BallBounce>().setAnotherFish(true);
-								}
-							}
-						}
-					}
-				}
-				
-				float closestPlantDouble = 1000.0f;
-				GameObject closestPlantGO = null;
-				Vector3 tempPosition = Vector3.zero;
-				
-				for (int k = 0; k < m_PlantList.Count; k++) {
-					
-					tempPosition = m_PlantList[k].transform.position;
-					tempPosition.y += 500.0f;
-					
-					float temp = Vector3.Distance (m_Vehicles[i].transform.position, tempPosition);
-					
-					if (temp < closestPlantDouble) {
-						closestPlantDouble = temp;
-						closestPlantGO = m_PlantList[k];
-					}
-				}
-				
-				if (tempScript.getAnotherFish ()) {
-					//
-				//	if (!fuzzifyInUse) {
-					//	fuzzifyInUse = true;
-					//	domDictionary.Clear ();
-					//	flg.setBoolDictionary(true);
-						float tempCold = Vector3.Distance (m_Vehicles[i].transform.position, hotLightPosition.transform.position);
-						tempDouble = cp.GetDesirability ((double)closestPlantDouble, (double)closestGoldFishFloat, tempHunger, tempLibido, tempCold, i);
-						//if (tempScript.getFishNumber() == 10) {
-							//flg.enterNumber(i);
-						//}
-					//	fuzzifyInUse = false;
-					//	flg.setBoolDictionary(false);
-
-						if (tempCold < 300.0f) {
-							m_Vehicles[i].GetComponent<BallBounce>().setState (4);
-							continue;
-						}
-					//}
-
-
-
-					if (tempDouble [0] > tempDouble [1]) {
-						//BallBounce tempPrey = closestGO.GetComponent<BallBounce> ();
-						//Debug.Log ("EEEAAAATTTTT!!!!!!");
-						tempScript.setState (1);//eat
-						//tempPrey.setState (2);//flee
-						tempScript.setPrey (closestPlantGO);
-						//tempPrey.setPredator (m_Vehicles [i]);
-						tempScript.setAnotherFish (false);
-						//tempPrey.setAnotherFish (false);
-						//tempScript.setHunger (0.0f);//set hunger to 0 after eat!!!
-						
-						//predatorCount++;
-						//PredatorText.text = "# Predators: " + predatorCount.ToString();
-						//preyCount++;
-						//PreyText.text = "# Prey: " + preyCount.ToString();
-						
-						////Debug.Log (m_Vehicles[i].GetComponent<BallBounce>().getKoi ());
-						/*
-                        if (m_Vehicles[i].GetComponent<BallBounce>().getKoi ()) {
-                            GameObject child = m_Vehicles[i].transform.Find("FishKoiMesh").gameObject;
-                            
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.red;
-                            }
-                        }
-                        */
-						
-						////Debug.Log (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish());
-						if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish())
-						{
-							GameObject child = m_Vehicles[i].transform.Find("GoldFishMesh").gameObject;
-							
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.red;
-							}
-							
-							
-						}
-						/*
-                        if (closestGO.GetComponent<BallBounce>().getKoi ()) {
-                            GameObject child = closestGO.transform.Find ("FishKoiMesh").gameObject;
-                            
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.yellow;
-                            }
-                        }
-                        
-                        if (closestGO.GetComponent<BallBounce>().getGoldfish ()) {
-                            GameObject child = closestGO.transform.Find ("GoldFishMesh").gameObject;
-                            
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.yellow;
-                            }
-                        }
-                        */
-						
-						
-					} else {
-						
-						if (closestGfMateGO == null) {
-							
-							continue;
-						}
-						
-						closestGfMateGO.gameObject.GetComponent<BallBounce> ().setAnotherFish (true);
-						counter++;
-						//mateCount += 2;
-						//MateText.text = "# fish mating: " + mateCount.ToString();
-						////Debug.Log ("MATE" + counter);
-						
-						BallBounce tempClosest = closestGfMateGO.GetComponent<BallBounce> ();  
-						
-						//if closest fish is hunting, leave fish alone and no mating.  
-						if (tempClosest.getState () == 1) {
-							tempClosest.setAnotherFish (false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//if closest fish is mating, interfere and mate  
-						if (tempClosest.getState () == 3) {
-							GameObject tempM = tempClosest.getMate ();
-							tempM.gameObject.GetComponent<BallBounce>().setState (0);
-							tempM.gameObject.GetComponent<BallBounce>().setMate(null);
-							tempM.gameObject.GetComponent<BallBounce>().setIsMating(false);
-							tempClosest.setMate (null);
-							tempClosest.setIsMating(false);
-
-							//change closest goldfish's mate back to yellow.  
-							GameObject child = tempM.transform.Find ("GoldFishMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.yellow;
-
-							}
-						}
-						
-						//if closest fish is fleeing, leave fish alone and not mating.  
-						if (tempClosest.getState () == 2) {
-							tempClosest.setAnotherFish (false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//is closest fish is spawning, then leave fish alone and no mating.  
-						if (tempClosest.getState () == 5) {
-							tempClosest.setAnotherFish (false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//tempScript.setLibido (0.0f);                
-						//otherwise, Mate
-						tempScript.setState (3);
-						tempScript.setTimer (0.0f);
-						tempScript.setIsMating (true);
-						
-						
-						tempClosest.setState (3);
-						tempScript.setMate (closestGfMateGO);
-						tempClosest.setMate (m_Vehicles [i]);    
-						tempClosest.setIsMating (true);
-						tempClosest.setTimer (0.0f);
-						tempScript.setAnotherFish (false);
-						tempClosest.setAnotherFish (false);
-						/*
-                        if (m_Vehicles[i].GetComponent<BallBounce>().getKoi ()) {
-                            GameObject child = m_Vehicles[i].transform.Find("FishKoiMesh").gameObject;
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.green;
-                            }
-                        }
-                        */
-						if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish ()) {
-							GameObject child = m_Vehicles[i].transform.Find("GoldFishMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.green;
-							}
-						}
-						/*
-                        if (closestGfMateGO.GetComponent<BallBounce>().getKoi ()) {
-                            GameObject child = closestGfMateGO.transform.Find ("FishKoiMesh").gameObject;
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.green;
-                            }
-                        }
-                        */
-						if (closestGfMateGO.GetComponent<BallBounce>().getGoldfish ()) {
-							GameObject child = closestGfMateGO.transform.Find ("GoldFishMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.green;
-							}
-						}
-						//m_Vehicles[i].gameObject.GetComponent<Renderer>().sharedMaterial.color = Color.green;
-						//    closestGO.gameObject.GetComponent<Renderer>().material.color = Color.green;
-					}
-				}
-			}
-			
-			//GameObject GoldFishPreyGO = null;
-			//GameObject KoiMateGO = null;
-			float closestKoiFloat = 1000.0f;
-			float closestGfFloat = 1000.0f;
-			
-			
-			
-			if (state == 4 && tempScript.getKoi ()) {
-				////Debug.Log ("Entered Loop!!!"); Working!!!
-				for (int j = 0; j < m_WanderList.Count; j++) {
-					    if (m_WanderList[j] != null) {
-					BallBounce tempState = m_WanderList [j].GetComponent<BallBounce> ();
-					
-					if (tempState.getGoldfish ()) {
-						//bool areEqual = System.Object.ReferenceEquals (m_Vehicles [i], m_WanderList [j]);
-						//if (!areEqual) {
-						float temp = Vector3.Distance (m_Vehicles [i].transform.position, m_WanderList [j].transform.position);
-						if (temp < closestGfFloat) {
-							closestGfFloat = temp;
-							GoldFishPreyGO = m_WanderList [j];
-							//anothFish = true;
-							tempScript.setAnotherPrey (true);//when do you reset this to false????  This is reset to false...
-							//GoldFishPreyGO.gameObject.GetComponent<BallBounce>().setAnotherFish(true);
-						}
-						//}
-						
-						
-					} //here
-					
-					
-					if (tempState.getKoi ()) {
-						bool areEqual = System.Object.ReferenceEquals (m_Vehicles [i], m_WanderList [j]);
-						if (!areEqual) {
-							float temp = Vector3.Distance (m_Vehicles [i].transform.position, m_WanderList [j].transform.position);
-							if (temp < closestKoiFloat) {
-								closestKoiFloat = temp;
-								KoiMateGO = m_WanderList [j];
-								//anothFish = true;
-								tempScript.setAnotherMate (true);//when do you reset this to false????  This is reset to false...
-								//GoldFishPreyGO.gameObject.GetComponent<BallBounce>().setAnotherFish(true);
-							}
-						}
-						
-						
-					} //here
-					
-					
-					}
-				}
-				
-				
-				//GoldFishPreyGO.gameObject.GetComponent<BallBounce> ().setAnotherFish (true);//you don't need this because other fish's state would be eat or mate, not wander. 
-				
-				//if (!fuzzifyInUse) {
-				//	fuzzifyInUse = true;
-				//	domDictionary.Clear ();
-				//	flg.setBoolDictionary(true);
-					float tempCold = Vector3.Distance (m_Vehicles[i].transform.position, hotLightPosition.transform.position);
-					tempDouble = cp.GetDesirability ((double)closestGfFloat, (double)closestKoiFloat, tempHunger, tempLibido, tempCold, i);
-					//if (tempScript.getFishNumber() == 10) {
-						//flg.enterNumber(i);
-					//}
-				//	fuzzifyInUse = false;
-				//	flg.setBoolDictionary(false);
-
-					if (tempCold < 300.0f) {
-						m_Vehicles[i].GetComponent<BallBounce>().setState (4);
-						continue;
-					}
-				//}
-
-				
-				if (tempDouble [0] > tempDouble [1]) {
-					if (tempScript.getAnotherPrey()) {
-						BallBounce tempPrey = GoldFishPreyGO.GetComponent<BallBounce> ();
-						
-						//if prey Goldfish is hunting, change gf state to fleeing.
-						if (tempPrey.getState () == 1) {
-							tempPrey.setPrey (null);
-							//continue;
-						}
-						
-						//if prey is already fleeing, take over and hunt
-						if (tempPrey.getState () == 2) {
-							GameObject tempPr = tempPrey.getPredator();
-							tempPr.gameObject.GetComponent<BallBounce>().setState (0);
-							tempPr.gameObject.GetComponent<BallBounce>().setPrey(null);
-
-							GameObject child = tempPr.transform.Find ("FishKoiMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.white;
-							}
-
-
-							tempPrey.setPredator (null);
-						}
-						
-						//if gf state is mating, change state to fleeing.
-						if (tempPrey.getState () == 3) {
-							GameObject tempM = tempPrey.getMate ();
-							tempM.gameObject.GetComponent<BallBounce>().setState (0);
-							tempM.gameObject.GetComponent<BallBounce>().setMate (null);
-							tempM.gameObject.GetComponent<BallBounce>().setIsMating(false);
-
-
-							GameObject child = tempM.transform.Find ("GoldFishMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.yellow;
-							}
-
-
-							tempPrey.setMate (null);
-							tempPrey.setIsMating(false);
-						}
-						
-						//if gf state is fleeing, change fish's predator to new predator.  Remember to check when prey is gone, to change back to flock for
-						//any predator fish.  
-						//if (tempPrey.getState () == 2) {
-						
-						//}
-						//if gf is spawning, leave alone and remain in wander state.
-						if(tempPrey.getState () == 5) {
-							tempScript.setAnotherPrey (false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//Debug.Log ("EEEAAAATTTTT!!!!!!");
-						tempScript.setState (1);//eat
-
-						//add predator to flee from***********
-						m_RedFish.Add (m_Vehicles[i]);
-
-						tempPrey.setState (2);//flee
-						tempScript.setPrey (GoldFishPreyGO);
-						tempPrey.setPredator (m_Vehicles [i]);
-						tempScript.setAnotherPrey (false);
-						tempPrey.setAnotherPrey (false);
-						//tempScript.setHunger (0.0f);
-						
-					//	predatorCount++;
-					//	PredatorText.text = "# Predators: " + predatorCount.ToString();
-					//	preyCount++;
-					//	PreyText.text = "# Prey: " + preyCount.ToString();
-						
-						////Debug.Log (m_Vehicles[i].GetComponent<BallBounce>().getKoi ());
-						
-						if (m_Vehicles[i].GetComponent<BallBounce>().getKoi ()) {
-							GameObject child = m_Vehicles[i].transform.Find("FishKoiMesh").gameObject;
-							
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.red;
-							}
-						}
-						/*
-                        ////Debug.Log (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish());
-                        if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish())
-                        {
-                            GameObject child = m_Vehicles[i].transform.Find("GoldFishMesh").gameObject;
-                            
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.red;
-                            }
-
-
-                        }
-
-                        if (GoldFishPreyGO.GetComponent<BallBounce>().getKoi ()) {
-                            GameObject child = GoldFishPreyGO.transform.Find ("FishKoiMesh").gameObject;
-                        
-                        
-                        if (child != null) {
-                            
-                            Renderer rend = child.GetComponent<Renderer>();
-                            //Material material = new Material(fishMaterial);
-                            
-                            rend.material.color = Color.yellow;
-                        }
-                        }
-*/
-						
-						if (GoldFishPreyGO.GetComponent<BallBounce>().getGoldfish ()) {
-							GameObject child = GoldFishPreyGO.transform.Find ("GoldFishMesh").gameObject;
-							
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.yellow;
-							}
-						}
-
-					}
-					/*here*/} else {
-					if (tempScript.getAnotherMate()) {
-						BallBounce tempClosest = KoiMateGO.GetComponent<BallBounce> ();
-						
-						//if closest fish is hunting, leave alone, remain in flocking state.
-						if (tempClosest.getState () == 1) {
-							tempScript.setAnotherMate (false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//is closest fish is fleeing, leave alone, remain in flocking state. 
-						if (tempClosest.getState () == 2) {
-							tempScript.setAnotherMate (false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//if closest fish is mating, start new mating with present fish.
-						if (tempClosest.getState () == 3) {
-							GameObject tempM = tempClosest.getMate ();
-							tempM.gameObject.GetComponent<BallBounce>().setMate (null);
-							tempM.gameObject.GetComponent<BallBounce>().setState (0);
-							tempM.gameObject.GetComponent<BallBounce>().setIsMating(false);
-
-							GameObject child = tempM.transform.Find ("FishKoiMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.white;
-							}
-
-
-							tempScript.setTimer (0.0f);
-							tempClosest.setMate (null);
-							tempClosest.setIsMating(false);
-						}
-						
-						//if closest fish is spawning, leave alone and remain in wander state.
-						if (tempClosest.getState () == 5) {
-							tempScript.setAnotherMate (false);
-							tempScript.setTimer (0.0f);
-							tempScript.setState (0);
-							continue;
-						}
-						
-						counter++;
-					//	mateCount += 2;
-					//	MateText.text = "# fish mating: " + mateCount.ToString();
-						//Debug.Log ("MATE" + counter);
-						//tempScript.setLibido (0.0f);                
-						tempScript.setState (3);
-						tempScript.setTimer (0.0f);
-						tempScript.setIsMating (true);
-						
-						
-						tempClosest.setState (3);
-						tempScript.setMate (KoiMateGO);
-						tempClosest.setMate (m_Vehicles [i]);    
-						tempClosest.setIsMating (true);
-						tempClosest.setTimer (0.0f);
-						tempScript.setAnotherMate (false);
-						tempClosest.setAnotherMate (false);
-						
-						if (m_Vehicles[i].GetComponent<BallBounce>().getKoi ()) {
-							GameObject child = m_Vehicles[i].transform.Find("FishKoiMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.green;
-							}
-						}
-						/*
-                        if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish ()) {
-                            GameObject child = m_Vehicles[i].transform.Find("GoldFishMesh").gameObject;
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.green;
-                            }
-                        }
-*/
-						if (KoiMateGO.GetComponent<BallBounce>().getKoi ()) {
-							GameObject child = KoiMateGO.transform.Find ("FishKoiMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.green;
-							}
-						}
-						/*
-                        if (KoiMateGO.GetComponent<BallBounce>().getGoldfish ()) {
-                            GameObject child = KoiMateGO.transform.Find ("GoldFishMesh").gameObject;
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.green;
-                            }
-                        }*/
-					}
-					//m_Vehicles[i].gameObject.GetComponent<Renderer>().sharedMaterial.color = Color.green;
-					//    GoldFishPreyGO.gameObject.GetComponent<Renderer>().material.color = Color.green;
-				}//here
-				
-			}
-			
-			GameObject closestEitherFish = null;
-			GameObject DolphinMateGO = null;
-			float closestFishFloat = 1000.0f;
-			float closestDolphinFloat = 1000.0f;
-			
-			tempScript.setAnotherPrey (false);
-			tempScript.setAnotherMate (false);
-			
-			if (state == 4 && tempScript.getAmberjack ()) {
-				////Debug.Log ("Entered Loop!!!"); Working!!!
-				for (int j = 0; j < m_WanderList.Count; j++) {
-					    if (m_WanderList[j] != null) {
-					BallBounce tempState = m_WanderList [j].GetComponent<BallBounce> ();
-					
-					if (tempState.getKoi ()) {
-						//bool areEqual = System.Object.ReferenceEquals (m_Vehicles [i], m_WanderList [j]);
-						//if (!areEqual) {
-						float temp = Vector3.Distance (m_Vehicles [i].transform.position, m_WanderList [j].transform.position);
-						if (temp < closestFishFloat) {
-							closestFishFloat = temp;
-							closestEitherFish = m_WanderList [j];
-							//anothFish = true;
-							tempScript.setAnotherPrey (true);//when do you reset this to false????  This is reset to false...
-							//GoldFishPreyGO.gameObject.GetComponent<BallBounce>().setAnotherFish(true);
-						}
-						//}
-						
-						
-					} //here
-					
-					
-					if (tempState.getAmberjack ()) {
-						bool areEqual = System.Object.ReferenceEquals (m_Vehicles [i], m_WanderList [j]);
-						if (!areEqual) {
-							float temp = Vector3.Distance (m_Vehicles [i].transform.position, m_WanderList [j].transform.position);
-							if (temp < closestDolphinFloat) {
-								closestDolphinFloat = temp;
-								DolphinMateGO = m_WanderList [j];
-								//anothFish = true;
-								tempScript.setAnotherMate (true);//when do you reset this to false????  This is reset to false...
-								//GoldFishPreyGO.gameObject.GetComponent<BallBounce>().setAnotherFish(true);
-							}
-						}
-						
-						
-					} //here
-					
-					
-					
-					}
-				}
-				
-				
-				//GoldFishPreyGO.gameObject.GetComponent<BallBounce> ().setAnotherFish (true);//you don't need this because other fish's state would be eat or mate, not wander. 
-				
-				//if (!fuzzifyInUse) {
-				//	fuzzifyInUse = true;
-				//	domDictionary.Clear ();
-				//	flg.setBoolDictionary(true);
-					float tempCold = Vector3.Distance (m_Vehicles[i].transform.position, hotLightPosition.transform.position);
-					tempDouble = cp.GetDesirability ((double)closestFishFloat, (double)closestDolphinFloat, tempHunger, tempLibido, tempCold, i);
-					//if (tempScript.getFishNumber() == 10) {
-						//flg.enterNumber(i);
-				//	}
-				//	fuzzifyInUse = false;
-				//	flg.setBoolDictionary(false);
-
-					if (tempCold < 300.0f) {
-						m_Vehicles[i].GetComponent<BallBounce>().setState (4);
-						continue;
-					}
-
-				//}
-
-				
-				if (tempDouble [0] > tempDouble [1]) {
-					if (tempScript.getAnotherPrey()) {
-						BallBounce tempPrey = closestEitherFish.GetComponent<BallBounce> ();
-						
-						//if closest fish is hunting, set its prey to flock, and hunt the hunter
-						if(tempPrey.getState () == 1) {
-							GameObject tempP = tempPrey.getPrey ();
-							tempP.gameObject.GetComponent<BallBounce>().setPredator(null);
-							tempP.gameObject.GetComponent<BallBounce>().setState (0);
-							tempPrey.setPrey (null);
-						}
-						
-						//if prey is already fleeing, take over as predator. 
-						if (tempPrey.getState () == 2) {
-							GameObject tempPr = tempPrey.getPredator ();
-							tempPr.gameObject.GetComponent<BallBounce>().setPrey (null);
-							tempPr.gameObject.GetComponent<BallBounce>().setState (0);
-
-							GameObject child = tempPr.transform.Find ("AmberjackMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.gray;
-							}
-
-							tempPrey.setPredator (null);
-						}
-						
-						//if prey is mating, end mating and become prey.
-						if (tempPrey.getState () == 3) {
-							GameObject tempM = tempPrey.getMate ();
-							tempM.gameObject.GetComponent<BallBounce>().setState (0);
-							tempM.gameObject.GetComponent<BallBounce>().setMate(null);
-							tempM.gameObject.GetComponent<BallBounce>().setIsMating(false);
-
-							GameObject child = tempM.transform.Find ("FishKoiMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.white;
-							}
-
-
-							tempPrey.setIsMating(false);
-							tempPrey.setMate (null);
-						}
-
-						//if prey is spawning, leave alone.  
-						if (tempPrey.getState () == 5) {
-							tempScript.setAnotherPrey(false);
-							tempScript.setState (0);
-							tempScript.setTimer (0.0f);
-							continue;
-						}
-						
-						//Debug.Log ("EEEAAAATTTTT!!!!!!");
-						tempScript.setState (1);//eat
-
-						//Add predator to flee from
-						m_RedFish.Add (m_Vehicles[i]);
-
-						tempPrey.setState (2);//flee
-						tempScript.setPrey (closestEitherFish);
-						tempPrey.setPredator (m_Vehicles [i]);
-						tempScript.setAnotherPrey (false);
-						tempPrey.setAnotherPrey (false);
-						//tempScript.setHunger (0.0f);
-						
-						//predatorCount++;
-						//PredatorText.text = "# Predators: " + predatorCount.ToString();
-						//preyCount++;
-						//PreyText.text = "# Prey: " + preyCount.ToString();
-						
-						////Debug.Log (m_Vehicles[i].GetComponent<BallBounce>().getKoi ());
-						
-						if (m_Vehicles[i].GetComponent<BallBounce>().getAmberjack ()) {
-							GameObject child = m_Vehicles[i].transform.Find("AmberjackMesh").gameObject;
-							
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.red;
-							}
-						}
-						/*
-                        ////Debug.Log (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish());
-                        if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish())
-                        {
-                            GameObject child = m_Vehicles[i].transform.Find("GoldFishMesh").gameObject;
-                            
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.red;
-                            }
-
-
-                        }
-*/
-						if (closestEitherFish.GetComponent<BallBounce>().getKoi ()) {
-							GameObject child = closestEitherFish.transform.Find ("FishKoiMesh").gameObject;
-							
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.yellow;
-							}
-						}
-						
-						/*
-                        if (closestEitherFish.GetComponent<BallBounce>().getAmberjack ()) {
-                            GameObject child = closestEitherFish.transform.Find ("AmberjackMesh").gameObject;
-                            
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.yellow;
-                            }
-                        }*/
-						
-						
-					} //end getAnotherPrey()
-					/*here*/} else {
-					if (tempScript.getAnotherMate()) {
-						BallBounce tempClosest = DolphinMateGO.GetComponent<BallBounce> (); 
-
-						//if closest fish is hunting, leave alone
-						if(tempClosest.getState () == 1) {
-							tempScript.setAnotherMate(false);
-							tempScript.setTimer (0.0f);
-							tempScript.setState (0);
-							continue;
-						}
-
-						//if closest fish is mating, take over.  
-						if (tempClosest.getState () == 3) {
-							GameObject tempM = tempClosest.getMate ();
-							tempM.gameObject.GetComponent<BallBounce>().setState (0);
-							tempM.gameObject.GetComponent<BallBounce>().setMate(null);
-							tempM.gameObject.GetComponent<BallBounce>().setIsMating(false);
-
-							GameObject child = tempM.transform.Find ("AmberjackMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer> ();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.gray;
-							}
-
-							tempClosest.setIsMating(false);
-							tempClosest.setMate (null);
-						}
-						
-						counter++;
-					//	mateCount += 2;
-					//	MateText.text = "# fish mating: " + mateCount.ToString();
-						//Debug.Log ("MATE" + counter);
-						//tempScript.setLibido (0.0f);                
-						tempScript.setState (3);
-						tempScript.setTimer (0.0f);
-						tempScript.setIsMating (true);
-						
-						tempClosest.setState (3);
-						tempScript.setMate (DolphinMateGO);
-						tempClosest.setMate (m_Vehicles [i]);    
-						tempClosest.setIsMating (true);
-						tempClosest.setTimer (0.0f);
-						tempScript.setAnotherMate (false);
-						tempClosest.setAnotherMate (false);
-						
-						if (m_Vehicles[i].GetComponent<BallBounce>().getAmberjack ()) {
-							GameObject child = m_Vehicles[i].transform.Find("AmberjackMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.green;
-							}
-						}
-						/*
-                        if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish ()) {
-                            GameObject child = m_Vehicles[i].transform.Find("GoldFishMesh").gameObject;
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.green;
-                            }
-                        }
-*/
-						if (DolphinMateGO.GetComponent<BallBounce>().getAmberjack ()) {
-							GameObject child = DolphinMateGO.transform.Find ("AmberjackMesh").gameObject;
-							
-							if (child != null) {
-								
-								Renderer rend = child.GetComponent<Renderer>();
-								//Material material = new Material(fishMaterial);
-								
-								rend.material.color = Color.green;
-							}
-						}
-						/*
-                        if (closestFish.GetComponent<BallBounce>().getGoldfish ()) {
-                            GameObject child = closestFish.transform.Find ("GoldFishMesh").gameObject;
-                            
-                            if (child != null) {
-                                
-                                Renderer rend = child.GetComponent<Renderer>();
-                                //Material material = new Material(fishMaterial);
-                                
-                                rend.material.color = Color.green;
-                            }
-                        }
-                    }*/
-						//m_Vehicles[i].gameObject.GetComponent<Renderer>().sharedMaterial.color = Color.green;
-						//    GoldFishPreyGO.gameObject.GetComponent<Renderer>().material.color = Color.green;
-					}//end isAnotherMate()  here
-					
-				} //end else
-			} //end state 4 and isDolphin == true
+            state = tempScript.getState();
+			//setAnimationSpeed(i);
 			
 			switch ((State)state) {
 			case State.Flock:
 				Flock (i);
-				break;
-				
-			case State.Wander:
-				Wander (i);
-				break;
-				
-			case State.Mate:
-				Mate (i);
-				break;
+                    break;
 				
 			case State.Spawn:
 				Spawn (i);
-				break;
-				
-			case State.Eat:
-				Predator (i);
-				break;
-				
-			case State.Flee:
-				Prey (i);
 				break;
 				
 			case State.Dead:
@@ -1629,276 +355,6 @@ public class CellSpacePartition : MonoBehaviour {
 	}
 	
 	
-	public void Prey(int i) {
-		
-		GameObject tempPredator = tempScript.getPredator ();
-		
-		float dist = Vector3.Distance (m_Vehicles [i].transform.position, tempPredator.transform.position);
-
-
-		if (dist < 100.0f) {
-			tempScript.setState (6);
-			tempScript.setTimer (0.0f);
-			BallBounce temp = tempPredator.GetComponent<BallBounce> ();
-			temp.setState (0);
-			temp.setTimer (0.0f);
-			temp.setHunger (0.0f);
-			temp.setVelocity (Vector3.zero);
-
-			
-			if (tempPredator.GetComponent<BallBounce>().getKoi ()) {
-				GameObject child = tempPredator.transform.Find ("FishKoiMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer> ();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.white;
-				}
-			}
-			
-			if (tempPredator.GetComponent<BallBounce>().getGoldfish ()) {
-				GameObject child = tempPredator.transform.Find ("GoldFishMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer> ();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.yellow;
-				}
-			}
-			
-			if (tempPredator.GetComponent<BallBounce>().getAmberjack ()) {
-				GameObject child = tempPredator.transform.Find ("AmberjackMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer> ();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.gray;
-				}
-			}
-			
-			
-			//predatorCount--;
-			//PredatorText.text = "# Predators: " + predatorCount.ToString ();
-			
-		}
-		//for (int i = 0; i < m_Vehicles.Count; i++) {
-		//BallBounce tempScript = m_Vehicles [i].GetComponent<BallBounce> ();
-		tempVelocity = tempScript.getVelocity ();
-		tempHeading = tempScript.getHeading ();
-		////Debug.Log (tempHeadingOne);  //values range from 0.0 to 0.#  Setting heading is working because values are changing.  
-		m_vVelocity = Vector3.zero;
-		SteeringForceSum = Vector3.zero;
-		Force = Vector3.zero;
-		RaycastHit hit;
-		//reset caseSwitch every Update.
-		caseSwitch = -1;
-		DistToClosestIP = 2000.0f;
-		int layerMask = 1 << 8;
-		//layerMask = ~layerMask;
-		
-		
-		//rayLength = 100.0f;
-		
-		FeelerForward(m_Vehicles[i].transform.position, tempVelocity, rayLength, layerMask, i);
-		
-		//3rd attempt feelers.
-		
-		//not working at all.
-		Quaternion rotation = Quaternion.AngleAxis (45.0f, Vector3.right);
-		Vector3 t = new Vector3 (0.0f, 0.0f, 0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerRight (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.left);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerLeft (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.down);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerDown(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.up);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerUp(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		addNormalForce (caseSwitch, i);
-		
-		
-		CalculateNeighbors (m_Vehicles [i].transform.position, 10.0f); //this radius is not used to calculate neighbors for testing?
-		
-		//    AccumulateForce (Force);
-		Force = Vector3.zero;
-		
-		//Force = Flee (tempPredator.transform.position, m_Vehicles [i]);
-		Force = Evade (tempPredator, m_Vehicles [i]);
-
-		AccumulateForce (Force);
-
-		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
-			AvoidPredator (i, m_Vehicles[i]);
-
-		Vector3 OldPos = m_Vehicles [i].transform.position;
-		
-		translatePosition (i);
-		
-		
-		this.UpdateEntity (m_Vehicles [i], OldPos);
-		//}
-		
-		
-	}
-	
-	public void Predator(int i) {
-		
-		
-		//for (int i = 0; i < m_Vehicles.Count; i++) {
-		//BallBounce tempScript = m_Vehicles [i].GetComponent<BallBounce> ();
-		tempVelocity = tempScript.getVelocity ();
-		tempHeading = tempScript.getHeading();
-		////Debug.Log (tempHeadingOne);  //values range from 0.0 to 0.#  Setting heading is working because values are changing.  
-		m_vVelocity = Vector3.zero;
-		SteeringForceSum = Vector3.zero;
-		Force = Vector3.zero;
-		RaycastHit hit;
-		//reset caseSwitch every Update.
-		caseSwitch = -1;
-		DistToClosestIP = 2000.0f;
-		int layerMask = 1 << 8;
-		//layerMask = ~layerMask;
-
-
-		GameObject tempPrey = m_Vehicles [i].GetComponent<BallBounce> ().getPrey ();
-		
-		if (m_Vehicles [i].GetComponent<BallBounce> ().getGoldfish ()) {
-			Vector3 tempLocation = Vector3.zero;
-			float distance = 0.0f;
-			
-			
-			
-			if (tempPrey != null) {
-				tempLocation = tempPrey.transform.position;
-				float number = Random.Range (100.0f, 500.0f);
-				tempLocation.y += number;
-				distance = Vector3.Distance (m_Vehicles [i].transform.position, tempLocation);
-			}
-			
-			if (distance < 100.0f) {
-				BallBounce tempBB = m_Vehicles [i].GetComponent<BallBounce> ();
-				tempBB.setState (0);
-				tempBB.setTimer (0.0f);
-				tempBB.setHunger (0.0f);
-				tempVelocity = Vector3.zero;
-				//tempBB.setVelocity (Vector3.zero);
-				
-				GameObject child = m_Vehicles [i].transform.Find ("GoldFishMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer> ();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.yellow;
-				}
-				
-				
-			}
-		}
-		//rayLength = 100.0f;
-		
-		FeelerForward(m_Vehicles[i].transform.position, tempVelocity, rayLength, layerMask, i);
-		
-		//3rd attempt feelers.
-		
-		//not working at all.
-		Quaternion rotation = Quaternion.AngleAxis (45.0f, Vector3.right);
-		Vector3 t = new Vector3 (0.0f, 0.0f, 0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerRight (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.left);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerLeft (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.down);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerDown(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.up);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerUp(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		addNormalForce (caseSwitch, i);
-		
-		CalculateNeighbors (m_Vehicles [i].transform.position, 10.0f); //this radius is not used to calculate neighbors for testing?
-		
-		//    AccumulateForce (Force);
-		Force = Vector3.zero;
-		
-		if (m_Vehicles [i].GetComponent<BallBounce> ().getKoi () || m_Vehicles[i].GetComponent<BallBounce>().getAmberjack ()) {
-			//tempPrey = tempScript.getPrey ();
-			if (tempPrey != null) {
-				Force = Pursuit (tempPrey, i);
-			}
-		}
-		
-		if (m_Vehicles [i].GetComponent<BallBounce> ().getGoldfish ()) {
-			
-			Vector3 tempLoc = Vector3.zero;
-			if (tempPrey != null) {
-				tempLoc = tempPrey.transform.position;
-				tempLoc.y += 400.0f; //try to make this random number.
-			}
-			Force = Arrive (tempLoc, m_Vehicles[i]);
-		}
-		
-		AccumulateForce (Force);
-
-		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
-			AvoidPredator (i, m_Vehicles[i]);
-
-		Vector3 OldPos = m_Vehicles [i].transform.position;
-		
-		translatePosition (i);
-		
-		
-		this.UpdateEntity (m_Vehicles [i], OldPos);
-		//}
-		
-		
-	}
 	
 	
 	public void Spawn(int i) {
@@ -2066,16 +522,6 @@ public class CellSpacePartition : MonoBehaviour {
 			}
 			
 			
-			/*
-            clone.GetComponent<BallBounce>().setVelocity(Vector3.zero);
-            //clone.gameObject.GetComponent<BallBounce> ().setVelocity (Vector3.zero);
-            //clone.gameObject.GetComponent<BallBounce> ().setHeading (Vector3.zero);
-            m_Vehicles.Add (clone);
-            m_WanderList.Add (clone);
-            this.AddEntity (clone);
-*/
-			
-			
 		}
 	//	if (m_Vehicles [i].gameObject.GetComponent<BallBounce> ().getFishNumber () == 1) {
 	//		File.AppendAllText (fileName, "state:" + tempScript.getState ().ToString () + "\n");
@@ -2090,257 +536,10 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	
 	
-	public void Mate(int i) {
-		//for (int i = 0; i < m_Vehicles.Count; i++) {
-		//BallBounce tempScript = m_Vehicles [i].GetComponent<BallBounce> ();
-		GameObject tempMate = tempScript.getMate ();
-		bool tMate = tempScript.getIsMating ();
-
-
-		if (!tMate) {
-			tempScript.setState(5);
-			tempScript.setLibido (0.0f);
-			//mateCount--;
-		//	MateText.text = "# fish mating: " + mateCount.ToString();
-			//m_Vehicles[i].gameObject.GetComponent<Renderer>().material.color = Color.clear;
-			
-			if (m_Vehicles[i].GetComponent<BallBounce>().getKoi ()) {
-				GameObject child = m_Vehicles[i].transform.Find ("FishKoiMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer>();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.white;
-				}
-			}
-			
-			if (m_Vehicles[i].GetComponent<BallBounce>().getGoldfish ()) {
-				GameObject child = m_Vehicles[i].transform.Find ("GoldFishMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer>();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.yellow;
-				}
-			}
-			
-			
-			if (m_Vehicles[i].GetComponent<BallBounce>().getAmberjack ()) {
-				GameObject child = m_Vehicles[i].transform.Find ("AmberjackMesh").gameObject;
-				
-				if (child != null) {
-					
-					Renderer rend = child.GetComponent<Renderer>();
-					//Material material = new Material(fishMaterial);
-					
-					rend.material.color = Color.gray;
-				}
-			}
-			
-			
-			//tempMate.gameObject.GetComponent<Renderer>().material = fishMaterial;
-			//tempMate.gameObject.GetComponent<BallBounce>().setState(5);
-		}
-		
-		tempVelocity = tempScript.getVelocity ();
-		tempHeading = tempScript.getHeading();
-		////Debug.Log (tempHeadingOne);  //values range from 0.0 to 0.#  Setting heading is working because values are changing.  
-		m_vVelocity = Vector3.zero;
-		SteeringForceSum = Vector3.zero;
-		Force = Vector3.zero;
-		RaycastHit hit;
-		//reset caseSwitch every Update.
-		caseSwitch = -1;
-		DistToClosestIP = 2000.0f;
-		int layerMask = 1 << 8;
-		//layerMask = ~layerMask;
-		
-		
-		//rayLength = 100.0f;
-		
-		
-		
-		FeelerForward(m_Vehicles[i].transform.position, tempVelocity, rayLength, layerMask, i);
-		
-		
-		//3rd attempt feelers.
-		
-		//not working at all.
-		Quaternion rotation = Quaternion.AngleAxis (45.0f, Vector3.right);
-		Vector3 t = new Vector3 (0.0f, 0.0f, 0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerRight (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.left);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerLeft (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.down);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerDown(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.up);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerUp(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		addNormalForce (caseSwitch, i);
-		
-		
-		CalculateNeighbors (m_Vehicles [i].transform.position, 10.0f); //this radius is not used to calculate neighbors for testing?
-		
-		//    AccumulateForce (Force);
-		Force = Vector3.zero;
-		//GameObject tempMate = tempScript.getMate ();
-
-		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
-			AvoidPredator (i, m_Vehicles[i]);
-
-		Force = Vector3.zero;
-
-		//Force = Arrive (tempMate.transform.position, m_Vehicles[i]);
-		if (tempMate == null) {
-			tempScript.setState (0);
-		} else {
-			Force = Seek (tempMate.transform.position, m_Vehicles [i]);
-		}
-		
-		//    //Debug.Log (Force);
-		/*float temp = Vector3.Distance (tempMate.transform.position, m_Vehicles[i].transform.position);
-
-        if (temp < 10.0f) {
-            //Debug.Log ("Collision!!!!!!!");
-            tempVelocity = Vector3.zero;
-            SteeringForceSum = Vector3.zero;
-        }*/
-		
-		AccumulateForce (Force);
-
-
-
-		Vector3 OldPos = m_Vehicles [i].transform.position;
-		
-		translatePosition (i);
-		
-		
-		this.UpdateEntity (m_Vehicles [i], OldPos);
-		//}
-	}
-	
-	
-	
-	
-	public void Wander(int i){
-		
-
-		//for (int i = 0; i < m_Vehicles.Count; i++) {
-		//BallBounce tempScript = m_Vehicles [i].GetComponent<BallBounce> ();
-		tempVelocity = tempScript.getVelocity ();
-		tempHeading = tempScript.getHeading();
-		////Debug.Log (tempHeadingOne);  //values range from 0.0 to 0.#  Setting heading is working because values are changing.  
-		m_vVelocity = Vector3.zero;
-		SteeringForceSum = Vector3.zero;
-		Force = Vector3.zero;
-		RaycastHit hit;
-		//reset caseSwitch every Update.
-		caseSwitch = -1;
-		DistToClosestIP = 2000.0f;
-		int layerMask = 1 << 8;
-		//layerMask = ~layerMask;
-		
-		
-		//rayLength = 100.0f;
-		
-		FeelerForward(m_Vehicles[i].transform.position, tempVelocity, rayLength, layerMask, i);
-		
-		
-		//3rd attempt feelers.
-		
-		//not working at all.
-		Quaternion rotation = Quaternion.AngleAxis (45.0f, Vector3.right);
-		Vector3 t = new Vector3 (0.0f, 0.0f, 0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerRight (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.left);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerLeft (m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.down);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerDown(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		
-		
-		
-		rotation = Quaternion.AngleAxis (45.0f, Vector3.up);
-		//Vector3 t = new Vector3(0.0f,0.0f,0.0f);
-		t = Quaternion.Inverse (rotation) * tempVelocity;
-		
-		FeelerUp(m_Vehicles [i].transform.position, t, rayLength / 2.0f, layerMask, i);
-		
-		addNormalForce (caseSwitch, i);
-		
-		
-		
-		//spheres only make significant movements when raycast hits wall.  
-		//CalculateNeighbors (m_Vehicles [i].transform.position, 10.0f); //this radius is not used to calculate neighbors for testing?
-		
-		//    Force = Vector3.zero;
-		
-		//Force = Wander () * WanderWeight;
-
-		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
-			AvoidPredator (i, m_Vehicles[i]);
-
-
-		//FlockingForce (i);
-		Force = Vector3.zero;
-		FlockingForce (i);
-
-		//AccumulateForce (Force);
-
-
-		Vector3 OldPos = m_Vehicles [i].transform.position;
-		
-		translatePosition (i);
-		
-		
-		this.UpdateEntity (m_Vehicles [i], OldPos);
-		//}
-		
-	}
-	
-	
-	
 	
 	public void Flock(int i)
 	{
 		
-		//for (int i = 0; i < m_Vehicles.Count; i++) {
-		//BallBounce tempScript = m_Vehicles [i].GetComponent<BallBounce> ();
 		tempVelocity = tempScript.getVelocity ();
 		tempHeading = tempScript.getHeading();
 		////Debug.Log (tempHeadingOne);  //values range from 0.0 to 0.#  Setting heading is working because values are changing.  
@@ -2403,8 +602,8 @@ public class CellSpacePartition : MonoBehaviour {
 		
 		//Force = Wander () * WanderWeight;
 
-		if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
-			AvoidPredator (i, m_Vehicles[i]);
+	//	if (!m_Vehicles[i].GetComponent<BallBounce>().getDolphin())
+	//		AvoidPredator (i, m_Vehicles[i]);
 
 		FlockingForce (i);
 
@@ -2596,45 +795,6 @@ public class CellSpacePartition : MonoBehaviour {
 		return;
 	}
 	
-	private Vector3 Wander(GameObject ent)
-	{
-		//float m_dWanderJitter = 1.0f * Time.deltaTime;
-		//m_dWanderJitter = Mathf.Clamp (m_dWanderJitter, 0.0f, 100.0f);
-		float m_dWanderJitter = 80.0f;
-		float JitterThisTimeSlice = m_dWanderJitter * Time.deltaTime;
-		
-		//BallBounce tempScript = ent.GetComponent<BallBounce> ();
-		Vector3 tempTarget = new Vector3 (0.0f, 0.0f, 0.0f);
-		tempTarget = tempScript.getTarget();
-		
-		Vector3 tempWander = new Vector3 (Random.value * JitterThisTimeSlice, Random.value * JitterThisTimeSlice, Random.value * JitterThisTimeSlice);
-		
-		tempTarget += tempWander;
-		
-		
-		
-		tempTarget = tempTarget.normalized;
-		
-		tempTarget *= 2.4f;
-		
-		tempScript.setTarget (tempTarget);
-		Vector3 MainTarget = new Vector3 (0.0f, 0.0f, 0.0f);
-		
-		MainTarget = ent.transform.position;
-		MainTarget.x += 2.4f * Mathf.Cos (Random.value * Mathf.PI * 2.0f); //1.2
-		MainTarget.y += 2.4f * Mathf.Cos (Random.value * Mathf.PI * 2.0f); //.5
-		MainTarget.z += 2.4f * Mathf.Sin (Random.value * Mathf.PI * 2.0f);
-		
-		
-		
-		//tempTarget + tempVelocity * 2.0f;//this is problem!!!
-		//MainTarget += ent.transform.position + ent.transform.forward;
-		
-		//Vector3 Target = new Vector3(0.0f,0.0f,0.0f);
-		//Target = transform.TransformPoint(MainTarget);
-		
-		return Seek (MainTarget, ent);
-	}
 	
 	private Vector3 Flee(Vector3 TargetPos, GameObject ent)//ent is m_Vehicles[i].
 	{
@@ -2695,7 +855,9 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	public void FeelerForward(Vector3 pos, Vector3 Vel, float rayLength, int LayerMask, int i) {
 		RaycastHit hit;
-		
+       // Vector3 Velo;
+        //Velo = tempVelocity.normalized;
+
 		if (Physics.Raycast (m_Vehicles [i].transform.position, tempVelocity, out hit, rayLength, LayerMask)) {
 			
 			////Debug.Log(hit.distance);
@@ -2720,7 +882,9 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	public void FeelerRight(Vector3 pos, Vector3 Vel, float rayLength, int LayerMask, int i) {
 		RaycastHit hit;
-		
+
+       // Vel = Vel.normalized;
+
 		if (Physics.Raycast (m_Vehicles [i].transform.position, Vel, out hit, rayLength / 2.0f, LayerMask)) {
 			
 			////Debug.Log(hit.distance);
@@ -2747,7 +911,9 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	public void FeelerLeft(Vector3 pos, Vector3 Vel, float rayLength, int LayerMask, int i) {
 		RaycastHit hit;
-		
+
+       // Vel = Vel.normalized;
+
 		if (Physics.Raycast (m_Vehicles [i].transform.position, Vel, out hit, rayLength / 2.0f, LayerMask)) {
 			
 			////Debug.Log(hit.distance);
@@ -2774,7 +940,8 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	public void FeelerDown(Vector3 pos, Vector3 Vel, float rayLength, int LayerMask, int i) {
 		RaycastHit hit;
-		
+        //Vel = Vel.normalized;
+
 		if (Physics.Raycast (m_Vehicles [i].transform.position, Vel, out hit, rayLength / 2.0f, LayerMask)) {
 			
 			////Debug.Log(hit.distance);
@@ -2801,7 +968,8 @@ public class CellSpacePartition : MonoBehaviour {
 	
 	public void FeelerUp(Vector3 pos, Vector3 Vel, float rayLength, int LayerMask, int i) {
 		RaycastHit hit;
-		
+        //Vel = Vel.normalized;
+
 		if (Physics.Raycast (m_Vehicles [i].transform.position, Vel, out hit, rayLength / 2.0f, LayerMask)) {
 			
 			////Debug.Log(hit.distance);
@@ -2831,35 +999,40 @@ public class CellSpacePartition : MonoBehaviour {
 		case 0: //is it correct to add m_Vehicles[i].transform.position?
 			Overshoot = m_Vehicles [i].transform.position + FeelerF - ClosestPoint;
 			Force = FeelerFNormal * Overshoot.magnitude * ObstacleAvoidanceWeight;
-			//Debug.Log (FeelerFNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);//values are normal.
+                if (Force.magnitude > 4)
+                    Force = Force.normalized * 4f;
 			AccumulateForce (Force);
 			break;
 		case 1: 
 			Overshoot = m_Vehicles [i].transform.position + FeelerU - ClosestPoint;
 			Force = FeelerUNormal * Overshoot.magnitude * ObstacleAvoidanceWeight;
-			//Debug.Log (FeelerUNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);
-			AccumulateForce (Force);
+                if (Force.magnitude > 4)
+                    Force = Force.normalized * 4f;
+                AccumulateForce (Force);
 			break;
 			
 		case 2: 
 			Overshoot = m_Vehicles [i].transform.position + FeelerD - ClosestPoint;
 			Force = FeelerDNormal * Overshoot.magnitude * ObstacleAvoidanceWeight;
-			//Debug.Log ( FeelerDNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);
-			AccumulateForce (Force);
+                if (Force.magnitude > 4)
+                    Force = Force.normalized * 4f;
+                AccumulateForce(Force);
 			break;
 			
 		case 3:
 			Overshoot = m_Vehicles [i].transform.position + FeelerL - ClosestPoint;
 			Force = FeelerLNormal * Overshoot.magnitude * ObstacleAvoidanceWeight;
-			//Debug.Log (FeelerLNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);
-			AccumulateForce (Force);
+                if (Force.magnitude > 4)
+                    Force = Force.normalized * 4f;
+                AccumulateForce(Force);
 			break;
 			
 		case 4:
 			Overshoot = m_Vehicles [i].transform.position + FeelerR - ClosestPoint;
 			Force = FeelerRNormal * Overshoot.magnitude * ObstacleAvoidanceWeight;
-			//Debug.Log (FeelerRNormal* Overshoot.magnitude * ObstacleAvoidanceWeight);rce);
-			AccumulateForce (Force);
+                if (Force.magnitude > 4)
+                    Force = Force.normalized * 4f;
+                AccumulateForce(Force);
 			break;
 			
 		default: 
@@ -2872,15 +1045,15 @@ public class CellSpacePartition : MonoBehaviour {
 		//Vector3 OldPos = m_Vehicles [i].transform.position;
 		////Debug.Log (SteeringForceSum); //these forces seem correct.
 		Vector3 acceleration = SteeringForceSum / VehicleMass;
-		
-		tempVelocity += acceleration * Time.deltaTime;  //what is value of Time.deltaTime vs netbeans time function???
+        // Debug.Log(acceleration * Time.deltaTime);
+        tempVelocity += acceleration * Time.deltaTime;  //what is value of Time.deltaTime vs netbeans time function???
 		////Debug.Log (tempHeadingOne); //this value of m_vVelocity is still 0,0,0 ...?
 
 		//if (tempScript.getDolphin ())
 		//	tempVelocity = tempVelocity;
 
 		if (tempVelocity.magnitude > MaxSpeed) {
-			Vector3 tempV = m_vVelocity.normalized;
+			Vector3 tempV = tempVelocity.normalized;
 			tempVelocity = tempV * MaxSpeed;
 			
 		}
@@ -2892,7 +1065,7 @@ public class CellSpacePartition : MonoBehaviour {
 		Vector3 tempPos = new Vector3(0.0f,0.0f,0.0f);
 		
 		tempPos = m_Vehicles[i].transform.position;
-		tempPos += tempVelocity * Time.deltaTime * 50.0f;//Time.deltaTime is what's added from original code. 
+        tempPos += tempVelocity * Time.deltaTime * 50.0f;//Time.deltaTime is what's added from original code. 
 		
 		
 		m_Vehicles[i].transform.position = tempPos;
@@ -2907,20 +1080,9 @@ public class CellSpacePartition : MonoBehaviour {
 		
 		if (tempVelocity != Vector3.zero) {
 			Quaternion r = Quaternion.LookRotation(tempVelocity, Vector3.up);
-			m_Vehicles[i].transform.rotation = Quaternion.Slerp (m_Vehicles[i].transform.rotation, r, 0.5f);
+            m_Vehicles[i].transform.rotation = Quaternion.Slerp (m_Vehicles[i].transform.rotation, r, .5f);
 		}
 
-		/*
-		if (m_Vehicles [i].transform.position.x < 0 || m_Vehicles [i].transform.position.x > 1000 ||
-		    m_Vehicles [i].transform.position.y < 0 || m_Vehicles [i].transform.position.y > 1000 ||
-		    m_Vehicles [i].transform.position.z < 0 || m_Vehicles [i].transform.position.z > 1000) {
-			
-			Vector3 randomLocation = new Vector3(Random.Range (30.0f, 900.0f), Random.Range (30.0f, 900.0f),Random.Range (30.0f, 900.0f));
-			m_Vehicles[i].transform.position = randomLocation;
-			
-			tempScript.setVelocity (Vector3.zero);
-			
-		}*/
 		float x = m_Vehicles [i].transform.position.x;
 		float y = m_Vehicles [i].transform.position.y;
 		float z = m_Vehicles [i].transform.position.z;
@@ -3040,12 +1202,8 @@ public class CellSpacePartition : MonoBehaviour {
 	public double[] getTempDouble() {
 		return tempDouble;
 	}
-
-	public GameObject getHotSphere() {
-		return hotLightPosition;
-	}
-
-
+    
+    /*
 	public void setAnimationSpeed(int i) {
 		anim = m_Vehicles [i].GetComponent<Animation> ();
 		
@@ -3077,7 +1235,7 @@ public class CellSpacePartition : MonoBehaviour {
 			//}
 		}
 	}
-
+    */
 	public void TagVehiclesWithinViewRange(GameObject m_pVehicle,List<GameObject> m_pVehicles, double m_dViewDistance) {
 		BallBounce temp = null;
 
@@ -3096,61 +1254,6 @@ public class CellSpacePartition : MonoBehaviour {
 		}
 	}
 
-	public Vector3 Separation(List<GameObject> neighbors, GameObject vehicle) {
-		Vector3 SteeringForce = Vector3.zero;
-
-		for (int a = 0; a < neighbors.Count; ++a) {
-			bool areEqual = System.Object.ReferenceEquals (vehicle,neighbors[a]);
-			if (!areEqual && neighbors[a].gameObject.GetComponent<BallBounce>().getTag ()) {
-				Vector3 ToAgent = vehicle.transform.position - neighbors[a].transform.position;
-				SteeringForce += ToAgent.normalized / ToAgent.magnitude;
-			}
-		}
-		return SteeringForce;
-	}
-
-	public Vector3 Alignment(List<GameObject> neighbors, GameObject vehicle) {
-		Vector3 AverageHeading = Vector3.zero;
-
-		int NeighborCount = 0;
-
-		for (int a = 0; a < neighbors.Count; ++a) {
-			bool areEqual = System.Object.ReferenceEquals (vehicle, neighbors [a]);
-			BallBounce temp = neighbors [a].gameObject.GetComponent<BallBounce> ();
-			if (!areEqual && temp.getTag ()) {
-				AverageHeading += temp.getHeading ();
-
-				++NeighborCount;
-			}
-		}
-		if (NeighborCount > 0) {
-			AverageHeading /= (float)NeighborCount;
-			AverageHeading -= vehicle.gameObject.GetComponent<BallBounce> ().getHeading ();
-		}
-		return AverageHeading;
-	}
-
-	public Vector3 Cohesion(List<GameObject> neighbors, GameObject vehicle) {
-		Vector3 CenterOfMass = Vector3.zero;
-		Vector3 SteeringForce = Vector3.zero;
-
-		int NeighborCount = 0;
-
-		for (int a = 0; a < neighbors.Count; ++a) {
-			bool areEqual = System.Object.ReferenceEquals (vehicle, neighbors [a]);
-			if (!areEqual && neighbors[a].gameObject.GetComponent<BallBounce>().getTag())
-			{
-				CenterOfMass += neighbors[a].transform.position;
-				++NeighborCount;
-			}
-		}
-
-		if (NeighborCount > 0) {
-			CenterOfMass /= (float)NeighborCount;
-			SteeringForce = Seek (CenterOfMass, vehicle);
-		}
-		return SteeringForce.normalized;
-	}
 
 	public void AvoidPredator(int i, GameObject ent) {
 		Force = Vector3.zero;
@@ -3160,8 +1263,8 @@ public class CellSpacePartition : MonoBehaviour {
 		float temp = 0f;
 		bool runAway = false;
 		
-		if (Vector3.Distance (m_Vehicles [i].transform.position, dolfinUsing.transform.position) < 300f)
-			Force = Evade (dolfinUsing, m_Vehicles [i]) * 1.5f;
+		//if (Vector3.Distance (m_Vehicles [i].transform.position, dolfinUsing.transform.position) < 300f)
+		//	Force = Evade (dolfinUsing, m_Vehicles [i]) * 1.5f;
 		
 		AccumulateForce (Force);
 		
@@ -3189,118 +1292,272 @@ public class CellSpacePartition : MonoBehaviour {
 		AccumulateForce (Force);
 
 	}
+    
+    public void CreateCells()
+    {
 
-	public Vector3 wander2(int i) {
-		float circleDistance = 100f;
+        AmberjackCount = 0;
 
-		Vector3 circleCenter = Vector3.zero;
-		circleCenter = m_Vehicles[i].GetComponent<BallBounce> ().getVelocity ();
-		circleCenter = circleCenter.normalized;
-		circleCenter = circleCenter * circleDistance;
+        m_dViewDistance = 50.0d;
 
-		Vector3 displacement = Vector3.zero;
-		displacement = new Vector3 (0f, -1f, 0f);
-		displacement = displacement * circleDistance;
+        numberGF = 0;
+        numberKoi = 0;
+        numberAJ = 0;
 
-		float number = displacement.magnitude;
-		displacement.x = Mathf.Cos (wanderAngle) * number;
-		displacement.y = Mathf.Sin (wanderAngle) * number;
-		displacement.z = Mathf.Cos (wanderAngle) * number;
+        m_dSpaceWidth = cx;//1000
+        m_dSpaceHeight = cy;
+        m_dSpaceDepth = cz;
 
-		wanderAngle += Random.Range (0, 1) * 10f - 10f * 0.5f;
+        m_iNumCellsX = NumCellsX;//10  do you need these variables?
+        m_iNumCellsY = NumCellsY;
+        m_iNumCellsZ = NumCellsZ;
 
-		Vector3 WanderForce = Vector3.zero;
+        m_dCellSizeX = cx / NumCellsX; //10
+        m_dCellSizeY = cy / NumCellsY;
+        m_dCellSizeZ = cz / NumCellsZ;
 
-		WanderForce = circleCenter + displacement;
+        m_Neighbors = new List<GameObject>(MaxEntities); //100
 
-		return Seek (WanderForce, m_Vehicles[i]);
-	}
+        //create the cells.  Is this correct?  Yes. 
+        for (int z = 0; z < m_iNumCellsZ; ++z)
+        {
+            for (int y = 0; y < m_iNumCellsY; ++y)
+            {
+                for (int x = 0; x < m_iNumCellsX; ++x)
+                {
+                    double left = x * m_dCellSizeX;
+                    double right = left + m_dCellSizeX;
+                    double bot = y * m_dCellSizeY;
+                    double top = bot + m_dCellSizeY;
+                    double front = z * m_dCellSizeZ;
+                    double back = front + m_dCellSizeZ;
 
-	public Vector3 wander3(int i) {
+                    Vector3 tempFront = new Vector3((float)left, (float)bot, (float)front);
+                    Vector3 tempBack = new Vector3((float)right, (float)top, (float)back);
+                    Vector3 sum = (tempFront + tempBack);
+                    Vector3 midPoint = sum / 2;
 
-		float JitterThisTimeSlice = m_dWanderJitter * Time.fixedDeltaTime;
+                    m_Cells.Add(new Cell(midPoint, 50.0f));//value is 50, but screen in netbeans if 500x500.  so, use 10.0f?
+                }
+            }
 
-		m_vWanderTarget += new Vector3 (Random.value * JitterThisTimeSlice, Random.value * JitterThisTimeSlice, Random.value * JitterThisTimeSlice);
+        }
 
-		m_vWanderTarget = m_vWanderTarget.normalized;
+    }
 
-		m_vWanderTarget *= m_dWanderRadius;
+    public void InitializeFish()
+    {
+        BallBounce bbtemp;
 
-		Vector3 target = m_vWanderTarget + new Vector3 (0f, 0f, m_dWanderDistance / Mathf.Cos (45));
-		Vector3 heading = m_Vehicles [i].gameObject.GetComponent<BallBounce> ().getHeading ();
+        for (int i = 0; i < 100; i++)
+        { //numAgents 50
 
-		Vector3 relative = transform.InverseTransformDirection (Vector3.right);
+            GameObject clone;
+            Vector3 temp = new Vector3(Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f));//for some reason all spheres move to one corner all time. 
+            clone = Instantiate(fish, temp, Quaternion.identity) as GameObject;
+            bbtemp = clone.GetComponent<BallBounce>();
+            bbtemp.setKoi();
+            bbtemp.setState(0);
+            //clone.GetComponent<BallBounce>().setFishNumber(i);
+            ////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
 
-		Vector3 normal = relative - Vector3.Project (relative, heading);
+            numberKoi++;
 
-		normal = normal.normalized * heading.magnitude;
+            m_Vehicles.Add(clone);
+            m_WanderList.Add(clone);
+            this.AddEntity(clone);
 
-		float[,] matrix = new float[3,3];
-		float[,] identity = new float[3, 3];
-		float[,] temp = new float[3, 3];
+        }
 
-		for (int k = 0; k < 3; k++) {
-			for (int j = 0; j < 3; j++) {
-				matrix[k,j] = 0.0f;
-			}
-		}
+        for (int i = 0; i < 100; i++)
+        { //50
 
-		matrix [0,0] = heading.x; matrix [0,1] = heading.y; matrix [0,2] = heading.z;
-		matrix [1,0] = normal.x; matrix [1,1] = normal.y; matrix [1,2] = normal.z;
-		matrix [2,0] = 0f; matrix [2,1] = 0; matrix [2,2] = 1;
+            GameObject clone;
+            Vector3 temp = new Vector3(Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f));//for some reason all spheres move to one corner all time. 
+            clone = Instantiate(goldFish, temp, Quaternion.identity) as GameObject;
+            bbtemp = clone.GetComponent<BallBounce>();
+            bbtemp.setGoldfish();
+            bbtemp.setState(0);
+            ////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
 
-		identity [0,0] = 1f; identity [0,1] = 0f; identity [0,2] = 0f;
-		identity [1,0] = 0f; identity [1,1] = 1f; identity [1,1] = 0f;
-		identity [2,0] = 0f; identity [2,1] = 0f; identity [2,2] = 1f;
+            numberGF++;
 
-		temp[0,0] = (identity[0,0] * matrix[0,0]) + (identity[0,1] * matrix[1,0]) + (identity[0,2]* matrix[2,0]);
-		temp[0,1] = (identity[0,0] * matrix[0,1]) + (identity[0,1] * matrix[1,1]) + (identity[0,2] * matrix[2,1]);
-		temp[0,2] = (identity[0,0] * matrix[0,2]) + (identity[0,1] * matrix[1,2]) + (identity[0,2] * matrix[2,2]);
-		
-		//second
-		temp[1,0] = (identity[1,0] * matrix[0,0]) + (identity[1,1] * matrix[1,0]) + (identity[1,2] * matrix[2,0]);
-		temp[1,1] = (identity[1,0] * matrix[0,1]) + (identity[1,1] * matrix[1,1]) + (identity[1,2] * matrix[2,1]);
-		temp[1,2] = (identity[1,0] * matrix[0,2]) + (identity[1,1] * matrix[1,2]) + (identity[1,2] * matrix[2,2]);
-		
-		//third
-		temp[2,0] = (identity[2,0] * matrix[0,0]) + (identity[2,1] * matrix[1,0]) + (identity[2,2] * matrix[2,0]);
-		temp[2,1] = (identity[2,0] * matrix[0,1]) + (identity[2,1] * matrix[1,1]) + (identity[2,2] * matrix[2,1]);
-		temp[2,2] = (identity[2,0] * matrix[0,2]) + (identity[2,1] * matrix[1,2]) + (identity[2,2] * matrix[2,2]);
+            m_Vehicles.Add(clone);
+            m_WanderList.Add(clone);
+            this.AddEntity(clone);
 
-		identity = temp;
+        }
 
-		matrix [0, 0] = 1f; matrix [0, 1] = 0f; matrix [0, 2] = 0f;
-		matrix [1, 0] = 0f; matrix [1, 1] = 1f; matrix [1, 2] = 0f;
-		matrix [2, 0] = m_Vehicles [i].transform.position.x; matrix [2, 1] = m_Vehicles [i].transform.position.y; matrix [2, 2] = m_Vehicles [i].transform.position.z;
+        
+        for (int i = 1; i < 75; i++)
+        {//30 fishDolphin is aberjack
 
+            GameObject clone;
+            Vector3 temp = new Vector3(Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f));//for some reason all spheres move to one corner all time. 
+            clone = Instantiate(fishDolphin, temp, Quaternion.identity) as GameObject;
+            bbtemp = clone.GetComponent<BallBounce>();
+            bbtemp.setAmberjack();
+            bbtemp.setState(0);
+            //clone.GetComponent<BallBounce>().setFishNumber(i);
+            ////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
 
-		temp[0,0] = (identity[0,0] * matrix[0,0]) + (identity[0,1] * matrix[1,0]) + (identity[0,2]* matrix[2,0]);
-		temp[0,1] = (identity[0,0] * matrix[0,1]) + (identity[0,1] * matrix[1,1]) + (identity[0,2] * matrix[2,1]);
-		temp[0,2] = (identity[0,0] * matrix[0,2]) + (identity[0,1] * matrix[1,2]) + (identity[0,2] * matrix[2,2]);
-		
-		//second
-		temp[1,0] = (identity[1,0] * matrix[0,0]) + (identity[1,1] * matrix[1,0]) + (identity[1,2] * matrix[2,0]);
-		temp[1,1] = (identity[1,0] * matrix[0,1]) + (identity[1,1] * matrix[1,1]) + (identity[1,2] * matrix[2,1]);
-		temp[1,2] = (identity[1,0] * matrix[0,2]) + (identity[1,1] * matrix[1,2]) + (identity[1,2] * matrix[2,2]);
-		
-		//third
-		temp[2,0] = (identity[2,0] * matrix[0,0]) + (identity[2,1] * matrix[1,0]) + (identity[2,2] * matrix[2,0]);
-		temp[2,1] = (identity[2,0] * matrix[0,1]) + (identity[2,1] * matrix[1,1]) + (identity[2,2] * matrix[2,1]);
-		temp[2,2] = (identity[2,0] * matrix[0,2]) + (identity[2,1] * matrix[1,2]) + (identity[2,2] * matrix[2,2]);
+            numberAJ++;
 
-		identity = temp;
+            AmberjackCount++;
+            m_Vehicles.Add(clone);
+            m_WanderList.Add(clone);
+            this.AddEntity(clone);
 
-		float tempX = (identity [0, 0] * target.x) + (identity [1, 0] * target.y) + (identity [2,0]);
-		float tempY = (identity [0, 1] * target.x) + (identity [1,1] * target.y) + (identity [2,1]);
-		float tempZ = /*(identity [0, 2] * target.x) + (identity [1, 2] * target.y)*/target.z + (identity [2, 2]);
-
-		target.x = tempX;
-		target.y = tempY;
-		target.z = tempZ;
-
-		return target - m_Vehicles[i].transform.position;
-
-	}
+        }
+        
+        GameObject clone1;
+        Vector3 temp1 = new Vector3(Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f));//for some reason all spheres move to one corner all time. 
+        clone1 = Instantiate(Dolfin, temp1, Quaternion.identity) as GameObject;
+        dolfinUsing = clone1;
+        clone1.GetComponent<BallBounce>().setDolphin();
+        clone1.GetComponent<BallBounce>().setState(0);
+        //clone.GetComponent<BallBounce>().setFishNumber(i);
+        ////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
+        /// 
+        m_Vehicles.Add(clone1);
+        //m_WanderList.Add (clone1);
+        this.AddEntity(clone1);
 
 
+        GameObject seaHorse;
+
+        //SeaHorse
+        temp1 = new Vector3(Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f), Random.Range(200.0f, 800.0f));//for some reason all spheres move to one corner all time. 
+        clone1 = Instantiate(SeaHorse, temp1, Quaternion.identity) as GameObject;
+        seaHorse = clone1;
+       // clone1.GetComponent<BallBounce>().setDolphin();
+       // clone1.GetComponent<BallBounce>().setState(0);
+        //clone.GetComponent<BallBounce>().setFishNumber(i);
+        ////Debug.Log (clone.GetComponent<BallBounce>().getKoi());//this returns true!!!
+        /// 
+       // m_Vehicles.Add(clone1);
+        //m_WanderList.Add (clone1);
+       // this.AddEntity(clone1);
+    }
+
+    public void InitializePlants()
+    {
+
+        GameObject plantClone;
+
+        for (int j = 0; j < 10; j++)
+        {
+            Vector3 plantLoc = new Vector3(Random.Range(10.0f, 980.0f), 20.0f, Random.Range(10.0f, 980.0f));
+            plantClone = Instantiate(seaweed, plantLoc, Quaternion.identity) as GameObject;
+
+            m_PlantList.Add(plantClone);
+        }
+
+        for (int j = 0; j < 10; j++)
+        {
+            Vector3 plantLoc = new Vector3(Random.Range(10.0f, 980.0f), 20.0f, Random.Range(10.0f, 980.0f));
+            plantClone = Instantiate(seaweed5by5, plantLoc, Quaternion.identity) as GameObject;
+            //m_PlantList.Add (plantClone);
+        }
+
+
+        for (int j = 0; j < 10; j++)
+        {
+            Vector3 plantLoc = new Vector3(Random.Range(10.0f, 980.0f), 20.0f, Random.Range(10.0f, 980.0f));
+            plantClone = Instantiate(seaweed5by8, plantLoc, Quaternion.identity) as GameObject;
+            //m_PlantList.Add (plantClone);
+        }
+
+
+        //    Instantiate (plant, plantLoc, Quaternion.identity);
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 stoneLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(stone, stoneLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(coral1, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(coral2, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(coral4, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(seaShell1, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(seaShell6, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(seaShell11, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(sponge1, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(sponge2by2, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(sponge3by3, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(stone1by2, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(stone2by3, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(20.0f, 900.0f), 10.0f, Random.Range(20.0f, 900.0f));
+            Instantiate(stone2by4, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(stone5by5, coralLoc, Quaternion.identity);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 coralLoc = new Vector3(Random.Range(10.0f, 900.0f), 10.0f, Random.Range(0.0f, 1000.0f));
+            Instantiate(stone5by6, coralLoc, Quaternion.identity);
+        }
+    }
 }
